@@ -18,14 +18,26 @@ dias AS (
      WHERE f.fecha_key BETWEEN v.desde AND v.hasta
      GROUP BY f.anio_mes
 ),
+-- Energía oficial del mes: suma de la energía oficial diaria = contador del inversor
+-- (sin los huecos de comunicación que sí afectan la integración, docs/02 §5) y, en
+-- los días sin contador, la energía integrada de las lecturas.
+energia AS (
+    SELECT d.inversor_id, f.anio_mes,
+           sum(d.e_fv_kwh_oficial)            AS e_fv_kwh,
+           sum(d.e_carga_kwh_oficial)         AS e_carga_kwh,
+           sum(d.e_red_kwh_oficial)           AS e_red_kwh,
+           sum(d.e_bat_carga_kwh_oficial)     AS e_bat_carga_kwh,
+           sum(d.e_bat_descarga_kwh_oficial)  AS e_bat_descarga_kwh,
+           count(*) FILTER (WHERE d.fuente_energia = 'Contador del inversor') AS dias_con_contador,
+           count(*)                                                          AS dias_con_datos
+      FROM gold.fact_energia_diaria d
+      JOIN gold.dim_fecha f USING (fecha_key)
+     GROUP BY d.inversor_id, f.anio_mes
+),
+-- Calidad del registro y régimen de red: desde las lecturas por minuto
 mes AS (
     SELECT m.inversor_id,
            f.anio_mes,
-           sum(m.e_fv_wh)            / 1000 AS e_fv_kwh,
-           sum(m.e_carga_wh)         / 1000 AS e_carga_kwh,
-           sum(m.e_red_wh)           / 1000 AS e_red_kwh,
-           sum(m.e_bat_carga_wh)     / 1000 AS e_bat_carga_kwh,
-           sum(m.e_bat_descarga_wh)  / 1000 AS e_bat_descarga_kwh,
            sum(m.segundos_cubiertos)        AS segundos_cubiertos,
            sum(m.n_lecturas)                AS n_lecturas,
            sum(m.n_lecturas_validas)        AS n_lecturas_validas,
@@ -39,40 +51,56 @@ mes AS (
 )
 SELECT mes.inversor_id,
        mes.anio_mes,
-       round(mes.e_fv_kwh, 2)                                                    AS k1_energia_solar_kwh,
-       round(mes.e_carga_kwh, 2)                                                 AS k2_energia_carga_kwh,
-       round(mes.e_red_kwh, 2)                                                   AS k3_energia_red_kwh,
+       round(en.e_fv_kwh, 2)                                                     AS k1_energia_solar_kwh,
+       round(en.e_carga_kwh, 2)                                                  AS k2_energia_carga_kwh,
+       round(en.e_red_kwh, 2)                                                    AS k3_energia_red_kwh,
        round(100 * mes.segundos_cubiertos / (d.dias_periodo * 86400.0), 2)       AS k4_disponibilidad_pct,
        round(100.0 * mes.n_lecturas_validas / nullif(mes.n_lecturas, 0), 2)      AS k5_datos_validos_pct,
-       round(100 * (1 - mes.e_red_kwh / nullif(mes.e_carga_kwh, 0)), 2)          AS k6_autosuficiencia_pct,
-       round(mes.e_bat_descarga_kwh / nullif(i.capacidad_bateria_kwh, 0)
+       round(100 * (1 - en.e_red_kwh / nullif(en.e_carga_kwh, 0)), 2)            AS k6_autosuficiencia_pct,
+       round(en.e_bat_descarga_kwh / nullif(i.capacidad_bateria_kwh, 0)
              / d.dias_periodo, 3)                                                AS k7_ciclos_bateria_dia,
        round(100.0 * mes.minutos_isla / nullif(mes.minutos_con_datos, 0), 2)     AS k8_tiempo_isla_pct,
        round(mes.minutos_isla / 60.0, 1)                                         AS k8_horas_isla,
-       round(100 * (mes.e_fv_kwh + mes.e_red_kwh + mes.e_bat_descarga_kwh
-                    - mes.e_carga_kwh - mes.e_bat_carga_kwh)
-             / nullif(mes.e_fv_kwh + mes.e_red_kwh + mes.e_bat_descarga_kwh, 0), 2) AS k9_perdidas_pct,
-       round(mes.e_red_kwh * gold.tarifa_cop_kwh(d.primer_dia), 0)               AS k10_costo_red_cop,
-       round((mes.e_carga_kwh - mes.e_red_kwh) * gold.tarifa_cop_kwh(d.primer_dia), 0) AS k11_ahorro_cop
+       round(100 * (en.e_fv_kwh + en.e_red_kwh + en.e_bat_descarga_kwh
+                    - en.e_carga_kwh - en.e_bat_carga_kwh)
+             / nullif(en.e_fv_kwh + en.e_red_kwh + en.e_bat_descarga_kwh, 0), 2) AS k9_perdidas_pct,
+       round(en.e_red_kwh * gold.tarifa_cop_kwh(d.primer_dia), 0)                AS k10_costo_red_cop,
+       round((en.e_carga_kwh - en.e_red_kwh) * gold.tarifa_cop_kwh(d.primer_dia), 0) AS k11_ahorro_cop,
+       round(100.0 * en.dias_con_contador / nullif(en.dias_con_datos, 0), 1)     AS dias_con_contador_pct
   FROM mes
   JOIN dias d USING (anio_mes)
+  LEFT JOIN energia en USING (inversor_id, anio_mes)
   LEFT JOIN gold.dim_inversor i ON i.inversor_id = mes.inversor_id AND i.es_vigente;
 
-COMMENT ON VIEW gold.v_kpi_mensual IS 'Indicadores K1–K11 por inversor y mes (solo histórico).';
+COMMENT ON VIEW gold.v_kpi_mensual IS
+    'Indicadores K1–K11 por inversor y mes (solo histórico). Energía: contadores del inversor; calidad e isla: lecturas.';
 
 -- ---------------------------------------------------------------- Costo por franja horaria (K12)
+-- La energía importada del mes es la del contador (K3); las lecturas por minuto solo
+-- dicen qué parte cayó en punta y qué parte fuera de punta.
 CREATE OR REPLACE VIEW gold.v_costo_franja_mensual AS
-SELECT m.inversor_id,
-       f.anio_mes,
-       h.franja_tarifaria,
-       round(sum(m.e_red_wh) / 1000, 2)                                                   AS e_red_kwh,
-       gold.tarifa_cop_kwh(min(f.fecha), 'Oficial', h.franja_tarifaria)                   AS tarifa_cop_kwh,
-       round(sum(m.e_red_wh) / 1000 * gold.tarifa_cop_kwh(min(f.fecha), 'Oficial', h.franja_tarifaria), 0) AS k12_costo_cop
-  FROM gold.fact_energia_minuto m
-  JOIN gold.dim_fecha f USING (fecha_key)
-  JOIN gold.dim_hora  h USING (hora_key)
- WHERE m.origen = 'historico'
- GROUP BY m.inversor_id, f.anio_mes, h.franja_tarifaria;
+WITH franja AS (
+    SELECT m.inversor_id, f.anio_mes, h.franja_tarifaria,
+           sum(m.e_red_wh) AS e_red_wh, min(f.fecha) AS primer_dia
+      FROM gold.fact_energia_minuto m
+      JOIN gold.dim_fecha f USING (fecha_key)
+      JOIN gold.dim_hora  h USING (hora_key)
+     WHERE m.origen = 'historico'
+     GROUP BY m.inversor_id, f.anio_mes, h.franja_tarifaria
+),
+reparto AS (
+    SELECT *, e_red_wh / nullif(sum(e_red_wh) OVER (PARTITION BY inversor_id, anio_mes), 0) AS participacion
+      FROM franja
+)
+SELECT r.inversor_id,
+       r.anio_mes,
+       r.franja_tarifaria,
+       round(k.k3_energia_red_kwh * r.participacion, 2)                                     AS e_red_kwh,
+       gold.tarifa_cop_kwh(r.primer_dia, 'Oficial', r.franja_tarifaria)                     AS tarifa_cop_kwh,
+       round(k.k3_energia_red_kwh * r.participacion
+             * gold.tarifa_cop_kwh(r.primer_dia, 'Oficial', r.franja_tarifaria), 0)         AS k12_costo_cop
+  FROM reparto r
+  JOIN gold.v_kpi_mensual k USING (inversor_id, anio_mes);
 
 -- ---------------------------------------------------------------- Estado actual (P5, P6, P7 · Grafana)
 CREATE OR REPLACE VIEW gold.v_estado_actual AS

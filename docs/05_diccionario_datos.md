@@ -191,6 +191,8 @@ Fuente del diccionario de los autores: `datos/zenodo/opencem-v1.0.0/documentatio
 | `datos_validos_pct` | `numeric(5,2)` | | Σ válidas / Σ recibidas × 100 (**K5**) | Derivado |
 | `minutos_en_isla` | `smallint` | | Minutos con régimen `Isla` (**K8**) | Derivado |
 | `dif_fv_pct` | `numeric(6,2)` | | (`e_fv_kwh` − `e_fv_kwh_contador`) / `e_fv_kwh_contador` × 100: **conciliación** | Derivado |
+| `e_fv_kwh_oficial`, `e_carga_kwh_oficial`, `e_red_kwh_oficial`, `e_bat_carga_kwh_oficial`, `e_bat_descarga_kwh_oficial` | `numeric(8,3)` | | **Energía que usan los KPI**: el contador del inversor si el día tiene contadores válidos (regla D2); si no, la energía integrada (regla D1). Red oficial = red→carga + red→batería | `statistics` o `fact_energia_minuto` |
+| `fuente_energia` | `text` | | `Contador del inversor` / `Integración de lecturas` | Derivado |
 
 ### `fact_evento_operativo`: un evento
 

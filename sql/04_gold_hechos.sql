@@ -67,10 +67,19 @@ CREATE TABLE IF NOT EXISTS gold.fact_energia_diaria (
     datos_validos_pct           numeric(5,2) CHECK (datos_validos_pct BETWEEN 0 AND 100),    -- K5
     minutos_en_isla             smallint CHECK (minutos_en_isla BETWEEN 0 AND 1440),          -- K8
     dif_fv_pct                  numeric(6,2),                                                 -- conciliación
+    -- Energía oficial del día (la que usan los KPI): el contador del inversor si existe;
+    -- si ese día no hay contador, la integrada (límite inferior por los huecos).
+    e_fv_kwh_oficial            numeric(8,3),
+    e_carga_kwh_oficial         numeric(8,3),
+    e_red_kwh_oficial           numeric(8,3),
+    e_bat_carga_kwh_oficial     numeric(8,3),
+    e_bat_descarga_kwh_oficial  numeric(8,3),
+    fuente_energia              text NOT NULL DEFAULT 'Contador del inversor'
+                                CHECK (fuente_energia IN ('Contador del inversor', 'Integración de lecturas')),
     PRIMARY KEY (fecha_key, inversor_id)
 );
 COMMENT ON TABLE gold.fact_energia_diaria IS
-    'Grano: un inversor en un día. Compara la energía integrada con los contadores del inversor (conciliación).';
+    'Grano: un inversor en un día. Energía oficial (contador o integrada) y conciliación entre ambas.';
 
 -- ---------------------------------------------------------------- 3. Eventos operativos
 -- Grano: un evento (episodio con inicio y fin, o puntual si ts_fin = ts_inicio).

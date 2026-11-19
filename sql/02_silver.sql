@@ -72,6 +72,8 @@ CREATE TABLE IF NOT EXISTS silver.lectura_minuto (
     modo_salida_cod    smallint,     -- moda de status.outstatus en el minuto
     estado_carga_cod   smallint,     -- moda de status.chgstatus en el minuto
     regimen_red        text NOT NULL CHECK (regimen_red IN ('Conectado', 'Isla', 'Sin dato')),
+    actividad_key      smallint NOT NULL DEFAULT 0 CHECK (actividad_key BETWEEN 0 AND 8),  -- 1 + 4·gpu + ws1 + 2·ws2
+    es_horario_solar   boolean,      -- dentro de un intervalo solar_daylight de context; nulo si no hay dato
     origen             text NOT NULL DEFAULT 'historico' CHECK (origen IN ('historico', 'simulado')),
     PRIMARY KEY (inversor_id, ts_minuto)
 );

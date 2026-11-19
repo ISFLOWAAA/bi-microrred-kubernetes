@@ -57,9 +57,9 @@ Granularidad base: **inversor × minuto** (capa Silver), agregable a hora, día,
 
 | ID | Indicador | Fórmula | Unidad | Granularidad | Meta / umbral | Fuente | Usuario |
 |---|---|---|---|---|---|---|---|
-| K1 | Energía solar generada | Σ `pv1power` · Δt (validada contra `statistics.pvgeneratenergytoday`) | kWh | Inversor, día, mes, periodo | Seguimiento; alerta si el día soleado < 50 % de la media móvil de 7 días | `analog_measurements`, `statistics` | Dirección |
-| K2 | Energía entregada a la carga | Σ `outw_a` · Δt (validada contra `usedenergytoday`) | kWh | Inversor, día, mes, periodo | Seguimiento | `analog_measurements`, `statistics` | Dirección, Finanzas |
-| K3 | Energía importada de la red | Σ max(`linepowerw_a`, 0) · Δt | kWh | Inversor, día, mes, periodo | Reducir mes a mes | `analog_measurements` | Dirección, Finanzas |
+| K1 | Energía solar generada | Contador diario `statistics.pvgeneratenergytoday` (validado con Σ `pv1power` · Δt; si el día no tiene contador válido, la integración) | kWh | Inversor, día, mes, periodo | Seguimiento; alerta si el día soleado < 50 % de la media móvil de 7 días | `analog_measurements`, `statistics` | Dirección |
+| K2 | Energía entregada a la carga | Contador `usedenergytoday` (validado con Σ `outw_a` · Δt: −0,2 % en días completos) | kWh | Inversor, día, mes, periodo | Seguimiento | `analog_measurements`, `statistics` | Dirección, Finanzas |
+| K3 | Energía importada de la red | Contadores red→carga + red→batería (`loadconsumlinetday` + `linechgenergytday`); sin contador, Σ max(`linepowerw_a`, 0) · Δt | kWh | Inversor, día, mes, periodo | Reducir mes a mes | `statistics`, `analog_measurements` | Dirección, Finanzas |
 | K4 | Disponibilidad del registro | Minutos con al menos una lectura / minutos del periodo | % | Inversor, día, mes | ≥ 95 % | `analog_measurements` | Mantenimiento, TI |
 | K5 | Porcentaje de datos válidos | Lecturas que pasan todas las reglas de limpieza / lecturas recibidas | % | Inversor, día, mes | ≥ 98 % | ETL (log de calidad) | TI |
 
@@ -67,7 +67,7 @@ Granularidad base: **inversor × minuto** (capa Silver), agregable a hora, día,
 
 | ID | Indicador | Fórmula | Unidad | Meta / umbral | Justificación |
 |---|---|---|---|---|---|
-| K6 | **Autosuficiencia** (*self-sufficiency*) | 1 − K3 / K2 | % | Línea base del año: inv. 1 ≈ 43 %, inv. 2 ≈ 30 %. Meta: +10 puntos (≥ 53 % y ≥ 40 %) | Resume en un número cuánto depende el campus de la red; es el KPI rector para decidir más FV o más batería |
+| K6 | **Autosuficiencia** (*self-sufficiency*) | 1 − K3 / K2 | % | Línea base del año: inv. 1 ≈ 40 %, inv. 2 ≈ 28 % (recalculada en la Fase 5 tras descartar contadores incoherentes, ver docs/06). Meta: +10 puntos (≥ 50 % y ≥ 38 %) | Resume en un número cuánto depende el campus de la red; es el KPI rector para decidir más FV o más batería |
 | K7 | **Ciclos equivalentes de batería** | Energía descargada / capacidad nominal. Capacidad = `settings.battpackrateah` (200 Ah) × 48 V ≈ 9,6 kWh | ciclos/día | ≤ 1 ciclo/día | Mide el desgaste: muchos ciclos significan reemplazo anticipado y pocos, batería sobredimensionada (P3). *Supuesto:* el inversor 2 reporta 0 Ah (sin configurar); se asume el mismo banco de 200 Ah |
 | K8 | **Tiempo en modo isla** | Minutos con `linevolta` = 0 / minutos disponibles | % y horas | Seguimiento; alerta si > 5 min | Desde el 2026-05-03 la microrred opera aislada; mide la resiliencia real del sistema |
 | K9 | **Pérdidas y autoconsumo del inversor** | (FV + red + descarga − carga − carga de batería) / entradas | % | ≤ 15 % | El balance tiene un residuo estable (mediana ≈ 107 W); cuantifica cuánta energía se pierde en la conversión |
@@ -88,7 +88,7 @@ Granularidad base: **inversor × minuto** (capa Silver), agregable a hora, día,
 | S2 | Energía por época de entrenamiento | S1 / `epochs` | Wh/época | Modelo de red neuronal | Investigadores |
 | S3 | **Fracción solar del cómputo** | Energía FV en minutos con tarea / energía de carga en esos minutos | % | Tipo de tarea, franja horaria | Investigadores, Dirección |
 | S4 | Costo por tarea | S1 × (1 − S3) × tarifa | COP | Tarea, tipo, modelo | Finanzas |
-| S5 | **Cómputo en horas de sol** | Minutos de GPU con FV > 0 / minutos de GPU | % | Mes, estación de trabajo | Dirección (hoy ≈ 45 %; meta ≥ 70 %) |
+| S5 | **Cómputo en horas de sol** | Minutos de GPU con FV > 0 / minutos de GPU | % | Mes, estación de trabajo | Dirección (hoy ≈ 38 %; meta ≥ 70 %) |
 
 ### 3.5 Operativos (Grafana y alertas)
 
