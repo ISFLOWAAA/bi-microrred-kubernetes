@@ -53,6 +53,7 @@ de litio de 48 V y entrada de red. Las cargas son estaciones de cómputo con GPU
 | Q8 | Columnas siempre en 0 | `normalloadw_a`, `sir` | todas | No se cargan |
 | Q9 | Columnas JSON (`*reserve`, `faulthistoryrecordNN`, `sysalarmflag`) | Texto con arreglos JSON | — | Se parsean en el ETL o quedan en `jsonb` |
 | Q10 | Hora en UTC, sitio en UTC+8 | Diccionario de columnas: "fractional Unix timestamp in UTC" | todas | Convertir a hora local para día, mes y franja horaria |
+| Q11 | Capacidad de batería sin configurar en el inversor 2 | `settings.battpackrateah` = 0 en el inv. 2 (200 Ah en el inv. 1) | todas (inv. 2) | Supuesto declarado: mismo banco de 200 Ah |
 
 ## 4. Dato inválido vs. evento operativo real
 

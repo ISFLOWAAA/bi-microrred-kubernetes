@@ -6,13 +6,12 @@ Institución Universitaria Pascual Bravo · Inteligencia de Negocios · 2026-II
 Docente: Ramiro Grisales Montoya
 Integrantes: Andres Asprilla · Jorge Andres Grisales
 
+**Enfoque de profundización: SolarBI** — perfil de consumo de cargas de cómputo con bitácoras JSON y telemetría eléctrica.
+
 ## ¿Qué es?
 
 Una solución de Inteligencia de Negocios que toma la telemetría real de una microrred
 (solar + batería + red) y la convierte en indicadores para tomar decisiones.
-
-**Línea de profundización:** perfil de consumo de cargas de cómputo, cruzando las
-bitácoras JSON con la telemetría eléctrica.
 
 > ¿Cuánta energía consume cada tipo de tarea de cómputo, de dónde sale (sol, batería o red) y cuánto cuesta?
 
