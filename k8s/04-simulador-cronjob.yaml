@@ -21,7 +21,7 @@ spec:
           restartPolicy: Never
           containers:
             - name: simulador
-              image: taller6/simulador:1.0.0
+              image: taller6/simulador:1.0.1
               imagePullPolicy: IfNotPresent
               envFrom:
                 - configMapRef: {name: config-microrred}

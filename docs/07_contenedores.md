@@ -5,7 +5,7 @@
 | Imagen | Dockerfile | Contenido | Tamaño |
 |---|---|---|---|
 | `taller6/etl:1.0.0` | [`etl/Dockerfile`](../etl/Dockerfile) | Python 3.13 + pandas, numpy, psycopg + código del ETL | 393 MB |
-| `taller6/simulador:1.0.0` | [`simulador/Dockerfile`](../simulador/Dockerfile) | Python 3.13 + psycopg + `simulador.py` | 194 MB |
+| `taller6/simulador:1.0.1` | [`simulador/Dockerfile`](../simulador/Dockerfile) | Python 3.13 + psycopg + `simulador.py` | 194 MB |
 
 **Imagen base: `python:3.13.18-slim-trixie`** (Debian 13 reducido, 178 MB).
 
@@ -50,7 +50,7 @@ flowchart LR
 ```bash
 cp .env.example .env                      # y poner una contraseña
 docker build -t taller6/etl:1.0.0 etl
-docker build -t taller6/simulador:1.0.0 simulador
+docker build -t taller6/simulador:1.0.1 simulador
 docker compose up -d                      # espera a que el ETL termine (~6 min la primera vez)
 docker compose logs etl                   # reglas de calidad y conciliación
 docker compose down                       # apagar (los datos quedan en pgdata)

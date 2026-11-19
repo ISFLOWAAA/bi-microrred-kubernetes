@@ -38,7 +38,7 @@ services:
 
   simulador:
     build: ./simulador
-    image: taller6/simulador:1.0.0
+    image: taller6/simulador:1.0.1
     env_file: .env
     environment:
       PGHOST: postgres
@@ -49,6 +49,25 @@ services:
     depends_on:
       etl:
         condition: service_completed_successfully
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:11.2.0
+    env_file: .env                          # POSTGRES_DB y GRAFANA_DB_PASSWORD para la fuente de datos
+    environment:
+      PGHOST: postgres
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/microrred.json
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+    ports:
+      - "3002:3000"                         # 3000 = Grafana nativo del equipo, 3001 = Grafana del clúster
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/tableros:/var/lib/grafana/dashboards:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
     restart: unless-stopped
 
 volumes:

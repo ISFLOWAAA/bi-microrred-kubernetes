@@ -1,0 +1,65 @@
+# Grafana: Deployment sin estado. Fuente de datos, tablero y alertas llegan por
+# provisioning (ConfigMaps creados por levantar.ps1 desde la carpeta grafana/).
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+  namespace: taller6
+spec:
+  type: LoadBalancer          # localhost:3001 (el 3000 del equipo lo usa otro Grafana)
+  selector: {app: grafana}
+  ports:
+    - {name: http, port: 3001, targetPort: 3000}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+  namespace: taller6
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: grafana}
+  template:
+    metadata:
+      labels: {app: grafana}
+    spec:
+      containers:
+        - name: grafana
+          image: grafana/grafana:11.2.0
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef: {name: config-microrred}     # PGHOST
+          env:
+            - {name: POSTGRES_DB, valueFrom: {secretKeyRef: {name: pg-credenciales, key: POSTGRES_DB}}}
+            - {name: GRAFANA_DB_PASSWORD, valueFrom: {secretKeyRef: {name: pg-credenciales, key: GRAFANA_DB_PASSWORD}}}
+            - {name: GF_SECURITY_ADMIN_USER, value: admin}
+            - {name: GF_SECURITY_ADMIN_PASSWORD, valueFrom: {secretKeyRef: {name: pg-credenciales, key: GRAFANA_ADMIN_PASSWORD}}}
+            - {name: GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH, value: /var/lib/grafana/dashboards/microrred.json}
+            - {name: GF_ANALYTICS_REPORTING_ENABLED, value: "false"}
+            - {name: GF_ANALYTICS_CHECK_FOR_UPDATES, value: "false"}
+            - {name: GF_NEWS_NEWS_FEED_ENABLED, value: "false"}
+          ports:
+            - {containerPort: 3000, name: http}
+          volumeMounts:
+            - {name: datasources, mountPath: /etc/grafana/provisioning/datasources}
+            - {name: proveedor, mountPath: /etc/grafana/provisioning/dashboards}
+            - {name: alertas, mountPath: /etc/grafana/provisioning/alerting}
+            - {name: tableros, mountPath: /var/lib/grafana/dashboards}
+          readinessProbe:
+            httpGet: {path: /api/health, port: 3000}
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: {path: /api/health, port: 3000}
+            initialDelaySeconds: 60
+            periodSeconds: 20
+            failureThreshold: 3
+          resources:
+            requests: {cpu: 100m, memory: 256Mi}
+            limits: {cpu: "1", memory: 512Mi}
+      volumes:
+        - {name: datasources, configMap: {name: grafana-datasources}}
+        - {name: proveedor, configMap: {name: grafana-proveedor}}
+        - {name: alertas, configMap: {name: grafana-alertas}}
+        - {name: tableros, configMap: {name: grafana-tableros}}

@@ -23,5 +23,5 @@ data:
   MODO: una_vez
   ESCENARIO: normal
   RUIDO_PCT: "5"
-  MAX_MINUTOS: "60"
+  MAX_MINUTOS: "180"
   RETENCION_DIAS: "7"

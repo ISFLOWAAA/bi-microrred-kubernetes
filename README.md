@@ -59,7 +59,7 @@ PostgreSQL del clúster: `localhost:5434`. Detalles en [`k8s/README.md`](k8s/REA
 ```bash
 cp .env.example .env                        # poner una contraseña real
 docker build -t taller6/etl:1.0.0 etl
-docker build -t taller6/simulador:1.0.0 simulador
+docker build -t taller6/simulador:1.0.1 simulador
 docker compose up -d                        # PostgreSQL → ETL (una vez, ~10 min) → simulador
 ```
 

@@ -1,0 +1,77 @@
+# Dos alertas provisionadas (indicadores O1 y O2 de docs/03). Se evalúan cada minuto,
+# una instancia por inversor. La ventana de 5 min está en la consulta: la condición
+# tiene que cumplirse en TODOS los minutos de la ventana (no basta un parpadeo).
+apiVersion: 1
+groups:
+  - orgId: 1
+    name: Microrred
+    folder: Microrred
+    interval: 1m
+    rules:
+      - uid: o1-soc-bajo
+        title: Batería baja (SoC < 20 % por 5 min)
+        condition: C
+        for: 0s
+        noDataState: OK
+        execErrState: Error
+        labels: {severidad: critica, indicador: O1}
+        annotations:
+          summary: "El SoC máximo de los últimos 5 min es {{ humanize $values.A.Value }} %."
+          description: >-
+            El inversor alarma al 15 % y corta al 5 %. En modo isla no hay red de respaldo:
+            reducir cargas (posponer entrenamientos en GPU) o revisar la carga de la batería.
+        data:
+          - refId: A
+            datasourceUid: pg-microrred
+            relativeTimeRange: {from: 600, to: 0}
+            model:
+              refId: A
+              format: table
+              rawQuery: true
+              rawSql: >-
+                SELECT 'Inversor ' || inversor_id AS inversor, max(soc_pct)::float AS valor
+                  FROM gold.fact_energia_minuto
+                 WHERE ts_minuto > now() - interval '5 minutes' AND soc_pct IS NOT NULL
+                 GROUP BY inversor_id
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              refId: C
+              type: threshold
+              expression: A
+              conditions:
+                - evaluator: {type: lt, params: [20]}
+
+      - uid: o2-red-caida
+        title: Red caída (sin tensión por 5 min)
+        condition: C
+        for: 0s
+        noDataState: OK
+        execErrState: Error
+        labels: {severidad: alta, indicador: O2}
+        annotations:
+          summary: "Sin tensión de red durante los últimos 5 min: la microrred opera en isla."
+          description: >-
+            Toda la carga depende del sol y la batería. Vigilar el SoC (alerta O1) y
+            avisar a los usuarios de cómputo.
+        data:
+          - refId: A
+            datasourceUid: pg-microrred
+            relativeTimeRange: {from: 600, to: 0}
+            model:
+              refId: A
+              format: table
+              rawQuery: true
+              rawSql: >-
+                SELECT 'Inversor ' || inversor_id AS inversor, coalesce(max(v_red_v), 999)::float AS valor
+                  FROM gold.fact_energia_minuto
+                 WHERE ts_minuto > now() - interval '5 minutes'
+                 GROUP BY inversor_id
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              refId: C
+              type: threshold
+              expression: A
+              conditions:
+                - evaluator: {type: lt, params: [1]}

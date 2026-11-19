@@ -30,7 +30,8 @@ Requisitos: Docker Desktop con Kubernetes activado, `.env` en la raíz y la SQLi
 | Acceso desde el anfitrión | `Service` `LoadBalancer` → `localhost:5434` | `02-postgres.yaml` |
 | Carga histórica una vez | `Job` `etl-carga-historica` (espera a la base con un *initContainer*) | `03-etl-job.yaml` |
 | Datos nuevos periódicos | `CronJob` `simulador` cada minuto | `04-simulador-cronjob.yaml` |
-| Saber si está sano | `readinessProbe` y `livenessProbe` con `pg_isready` | `02-postgres.yaml` |
+| Saber si está sano | `readinessProbe` y `livenessProbe` (`pg_isready` en PostgreSQL, `/api/health` en Grafana) | `02-postgres.yaml`, `05-grafana.yaml` |
+| Grafana siempre disponible | `Deployment` + 4 `ConfigMap` de provisioning; `LoadBalancer` en `localhost:3001` | `05-grafana.yaml` |
 | No agotar el equipo | `resources.requests` / `limits` en todos los contenedores | todos |
 
 **Por qué `LoadBalancer` y no `NodePort`:** en Docker Desktop con *kind* el NodePort queda dentro del

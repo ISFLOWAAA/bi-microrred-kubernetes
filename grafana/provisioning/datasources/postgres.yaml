@@ -1,0 +1,19 @@
+# Fuente de datos: PostgreSQL por nombre del Service, con el usuario de solo lectura.
+# Las variables ${...} las pone el contenedor desde el ConfigMap y el Secret.
+apiVersion: 1
+datasources:
+  - name: Microrred
+    uid: pg-microrred
+    type: grafana-postgresql-datasource
+    url: ${PGHOST}:5432
+    user: grafana_lector
+    isDefault: true
+    editable: false
+    jsonData:
+      database: ${POSTGRES_DB}
+      sslmode: disable
+      postgresVersion: 1600
+      maxOpenConns: 5
+      timeInterval: 1m
+    secureJsonData:
+      password: ${GRAFANA_DB_PASSWORD}

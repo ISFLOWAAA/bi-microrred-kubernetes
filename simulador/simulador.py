@@ -84,7 +84,9 @@ def ciclo(con, dias, cfg):
         return
     ultimo = con.execute("SELECT max(ts_minuto) FROM gold.fact_energia_minuto "
                          "WHERE origen = 'simulado'").fetchone()[0]
-    desde = max(ultimo + timedelta(minutes=1) if ultimo else ahora, ahora - timedelta(minutes=cfg["max"] - 1))
+    # La primera vez rellena las últimas MAX_MINUTOS para que el tablero no arranque vacío
+    tope = ahora - timedelta(minutes=cfg["max"] - 1)
+    desde = max(ultimo + timedelta(minutes=1), tope) if ultimo else tope
     n = 0
     ts = desde
     while ts <= ahora:
