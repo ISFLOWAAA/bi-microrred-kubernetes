@@ -1,0 +1,36 @@
+# --- Datos: pesados, se descargan de Zenodo (ver datos/README.md) ---
+datos/*
+!datos/README.md
+*.sqlite
+*.sqlite3
+*.zst
+*.db
+
+# --- Credenciales: nunca se suben (solo la plantilla .env.example) ---
+.env
+*.env
+!.env.example
+**/secret.yaml
+**/*-secret.yaml
+
+# --- Enunciado del docente (se guarda solo en local) ---
+docs/BI_Taller6_Microrred_Kubernetes.docx
+
+# --- Python ---
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# --- Power BI (cache y configuración local del formato PBIP) ---
+**/.pbi/localSettings.json
+**/.pbi/cache.abf
+
+# --- Sistema y editores ---
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+~$*
+*.tmp
+*.log
