@@ -55,7 +55,7 @@ Cada fase deja algo funcionando y un commit en GitHub.
 ## Avance
 
 - [x] Fase 0 · Estructura del repositorio
-- [ ] Fase 0 · Integrantes en el README y repo en GitHub
+- [x] Fase 0 · Integrantes en el README y repo en GitHub
 - [ ] Fase 1 · Datos descargados, verificados e inventariados
 - [ ] Fase 2 · Negocio e indicadores
 - [ ] Fase 3 · Modelo dimensional y diccionario

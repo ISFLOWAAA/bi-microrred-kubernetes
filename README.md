@@ -4,7 +4,7 @@
 
 Institución Universitaria Pascual Bravo · Inteligencia de Negocios · 2026-II
 Docente: Ramiro Grisales Montoya
-Integrantes: _pendiente_
+Integrantes: Andres Asprilla · Jorge Andres Grisales
 
 ## ¿Qué es?
 
