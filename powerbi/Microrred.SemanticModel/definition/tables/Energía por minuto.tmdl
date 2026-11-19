@@ -1,0 +1,142 @@
+table 'Energía por minuto'
+
+	column 'Minuto'
+		dataType: dateTime
+		formatString: dd/mm/yyyy hh:nn
+		summarizeBy: none
+		sourceColumn: ts_minuto
+
+	column 'inversor_id'
+		dataType: int64
+		formatString: 0
+		isHidden
+		summarizeBy: none
+		sourceColumn: inversor_id
+
+	column 'fecha_key'
+		dataType: int64
+		formatString: 0
+		isHidden
+		summarizeBy: none
+		sourceColumn: fecha_key
+
+	column 'hora_key'
+		dataType: int64
+		formatString: 0
+		isHidden
+		summarizeBy: none
+		sourceColumn: hora_key
+
+	column 'inversor_sk'
+		dataType: int64
+		formatString: 0
+		isHidden
+		summarizeBy: none
+		sourceColumn: inversor_sk
+
+	column 'estado_key'
+		dataType: int64
+		formatString: 0
+		isHidden
+		summarizeBy: none
+		sourceColumn: estado_key
+
+	column 'actividad_key'
+		dataType: int64
+		formatString: 0
+		isHidden
+		summarizeBy: none
+		sourceColumn: actividad_key
+
+	column 'n_lecturas'
+		dataType: int64
+		formatString: 0
+		isHidden
+		summarizeBy: none
+		sourceColumn: n_lecturas
+
+	column 'n_lecturas_validas'
+		dataType: int64
+		formatString: 0
+		isHidden
+		summarizeBy: none
+		sourceColumn: n_lecturas_validas
+
+	column 'segundos_cubiertos'
+		dataType: double
+		isHidden
+		summarizeBy: none
+		sourceColumn: segundos_cubiertos
+
+	column 'e_fv_wh'
+		dataType: double
+		isHidden
+		summarizeBy: none
+		sourceColumn: e_fv_wh
+
+	column 'e_carga_wh'
+		dataType: double
+		isHidden
+		summarizeBy: none
+		sourceColumn: e_carga_wh
+
+	column 'e_red_wh'
+		dataType: double
+		isHidden
+		summarizeBy: none
+		sourceColumn: e_red_wh
+
+	column 'e_bat_carga_wh'
+		dataType: double
+		isHidden
+		summarizeBy: none
+		sourceColumn: e_bat_carga_wh
+
+	column 'e_bat_descarga_wh'
+		dataType: double
+		isHidden
+		summarizeBy: none
+		sourceColumn: e_bat_descarga_wh
+
+	column 'p_fv_w'
+		dataType: double
+		isHidden
+		summarizeBy: none
+		sourceColumn: p_fv_w
+
+	column 'p_carga_w'
+		dataType: double
+		isHidden
+		summarizeBy: none
+		sourceColumn: p_carga_w
+
+	column 'p_red_w'
+		dataType: double
+		isHidden
+		summarizeBy: none
+		sourceColumn: p_red_w
+
+	column 'soc_pct'
+		dataType: double
+		isHidden
+		summarizeBy: none
+		sourceColumn: soc_pct
+
+	column 'temp_max_c'
+		dataType: double
+		isHidden
+		summarizeBy: none
+		sourceColumn: temp_max_c
+
+	partition 'Energía por minuto' = m
+		mode: import
+		source =
+				let
+					Origen = PostgreSQL.Database(ServidorPG, BasePG),
+					Tabla = Origen{[Schema = "gold", Item = "fact_energia_minuto"]}[Data],
+					Historico = Table.SelectRows(Tabla, each [origen] = "historico"),
+					Columnas = Table.SelectColumns(Historico, {"inversor_id", "fecha_key", "hora_key", "inversor_sk", "estado_key", "actividad_key", "n_lecturas", "n_lecturas_validas", "segundos_cubiertos", "e_fv_wh", "e_carga_wh", "e_red_wh", "e_bat_carga_wh", "e_bat_descarga_wh", "p_fv_w", "p_carga_w", "p_red_w", "soc_pct", "temp_max_c"}),
+					Hora0 = Table.AddColumn(Columnas, "ts_minuto", each if [fecha_key] > 0 and [hora_key] >= 0 then #datetime(Number.IntegerDivide([fecha_key], 10000), Number.Mod(Number.IntegerDivide([fecha_key], 100), 100), Number.Mod([fecha_key], 100), Number.IntegerDivide([hora_key], 60), Number.Mod([hora_key], 60), 0) else null, type datetime),
+					Tipos = Table.TransformColumnTypes(Hora0, {{"inversor_id", Int64.Type}, {"fecha_key", Int64.Type}, {"hora_key", Int64.Type}, {"inversor_sk", Int64.Type}, {"estado_key", Int64.Type}, {"actividad_key", Int64.Type}, {"n_lecturas", Int64.Type}, {"n_lecturas_validas", Int64.Type}, {"segundos_cubiertos", type number}, {"e_fv_wh", type number}, {"e_carga_wh", type number}, {"e_red_wh", type number}, {"e_bat_carga_wh", type number}, {"e_bat_descarga_wh", type number}, {"p_fv_w", type number}, {"p_carga_w", type number}, {"p_red_w", type number}, {"soc_pct", type number}, {"temp_max_c", type number}})
+				in
+					Tipos

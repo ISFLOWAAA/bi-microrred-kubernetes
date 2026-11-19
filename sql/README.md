@@ -18,6 +18,7 @@ errores ni filas duplicadas (`CREATE ... IF NOT EXISTS`, `CREATE OR REPLACE`, `O
 | `04_gold_hechos.sql` | Los 4 hechos: `fact_energia_minuto`, `fact_energia_diaria`, `fact_evento_operativo`, `fact_tarea_computo` |
 | `05_gold_vistas.sql` | Vistas de indicadores para Power BI y Grafana |
 | `06_seguridad.sql` | Roles sin login: `rol_etl`, `rol_lectura_bi`, `rol_simulador` (mínimo privilegio) |
+| `07_usuarios_consumo.sh` | Usuarios con login de solo lectura: `grafana_lector` y `powerbi_lector` (miembros de `rol_lectura_bi`); las contraseñas llegan por variables de entorno, nunca en el repo |
 
 ## Funciones de apoyo (las usan el ETL y el simulador)
 

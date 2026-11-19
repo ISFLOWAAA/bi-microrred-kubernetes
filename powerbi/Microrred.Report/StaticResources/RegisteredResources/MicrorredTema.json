@@ -1,0 +1,28 @@
+{
+  "name": "Microrred",
+  "dataColors": [
+    "#F2B705",
+    "#3D7DD8",
+    "#9B7BC9",
+    "#2BA672",
+    "#E5634D",
+    "#8A94A6"
+  ],
+  "background": "#FFFFFF",
+  "foreground": "#111827",
+  "tableAccent": "#3D7DD8",
+  "textClasses": {
+    "label": {
+      "fontFace": "Segoe UI"
+    },
+    "callout": {
+      "fontFace": "Segoe UI Semibold"
+    },
+    "title": {
+      "fontFace": "Segoe UI Semibold"
+    },
+    "header": {
+      "fontFace": "Segoe UI Semibold"
+    }
+  }
+}

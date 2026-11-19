@@ -1,0 +1,24 @@
+model Model
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	discourageImplicitMeasures
+
+ref table 'Fecha'
+ref table 'Hora'
+ref table 'Inversor'
+ref table 'Estado operativo'
+ref table 'Actividad de cómputo'
+ref table 'Tipo de evento'
+ref table 'Perfil de tarea'
+ref table 'Dispositivo'
+ref table 'Tarifa'
+ref table 'Energía diaria'
+ref table 'Energía por minuto'
+ref table 'Eventos'
+ref table 'Tareas de cómputo'
+ref table 'Medidas'
+ref table 'Balance energético'
+ref table 'Parámetro tarifa'
+ref table 'Parámetro solar'
+
+ref expression ServidorPG
+ref expression BasePG

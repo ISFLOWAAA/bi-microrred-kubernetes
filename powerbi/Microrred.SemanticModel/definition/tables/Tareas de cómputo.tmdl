@@ -1,0 +1,147 @@
+table 'Tareas de cómputo'
+
+	column 'Tarea'
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: tarea_id
+
+	column 'fecha_key'
+		dataType: int64
+		formatString: 0
+		isHidden
+		summarizeBy: none
+		sourceColumn: fecha_key
+
+	column 'hora_key'
+		dataType: int64
+		formatString: 0
+		isHidden
+		summarizeBy: none
+		sourceColumn: hora_key
+
+	column 'inversor_sk'
+		dataType: int64
+		formatString: 0
+		isHidden
+		summarizeBy: none
+		sourceColumn: inversor_sk
+
+	column 'dispositivo_key'
+		dataType: int64
+		formatString: 0
+		isHidden
+		summarizeBy: none
+		sourceColumn: dispositivo_key
+
+	column 'perfil_tarea_key'
+		dataType: int64
+		formatString: 0
+		isHidden
+		summarizeBy: none
+		sourceColumn: perfil_tarea_key
+
+	column 'Inicio'
+		dataType: dateTime
+		formatString: dd/mm/yyyy hh:nn
+		summarizeBy: none
+		sourceColumn: ts_inicio
+
+	column 'Fin'
+		dataType: dateTime
+		formatString: dd/mm/yyyy hh:nn
+		summarizeBy: none
+		sourceColumn: ts_fin
+
+	column 'Duración (min)'
+		dataType: double
+		summarizeBy: none
+		sourceColumn: duracion_min
+
+	column 'epocas'
+		dataType: int64
+		formatString: 0
+		isHidden
+		summarizeBy: none
+		sourceColumn: epocas
+
+	column 'batch_size'
+		dataType: int64
+		formatString: 0
+		isHidden
+		summarizeBy: none
+		sourceColumn: batch_size
+
+	column 'parametros_modelo'
+		dataType: int64
+		formatString: 0
+		isHidden
+		summarizeBy: none
+		sourceColumn: parametros_modelo
+
+	column 'nucleos_cpu'
+		dataType: int64
+		formatString: 0
+		isHidden
+		summarizeBy: none
+		sourceColumn: nucleos_cpu
+
+	column 'archivos'
+		dataType: int64
+		formatString: 0
+		isHidden
+		summarizeBy: none
+		sourceColumn: archivos
+
+	column 'e_carga_wh'
+		dataType: double
+		isHidden
+		summarizeBy: none
+		sourceColumn: e_carga_wh
+
+	column 'e_incremental_wh'
+		dataType: double
+		isHidden
+		summarizeBy: none
+		sourceColumn: e_incremental_wh
+
+	column 'e_fv_wh'
+		dataType: double
+		isHidden
+		summarizeBy: none
+		sourceColumn: e_fv_wh
+
+	column 'e_red_wh'
+		dataType: double
+		isHidden
+		summarizeBy: none
+		sourceColumn: e_red_wh
+
+	column 'fraccion_solar'
+		dataType: double
+		isHidden
+		summarizeBy: none
+		sourceColumn: fraccion_solar
+
+	column 'costo_cop'
+		dataType: double
+		isHidden
+		summarizeBy: none
+		sourceColumn: costo_cop
+
+	column 'cobertura_pct'
+		dataType: double
+		isHidden
+		summarizeBy: none
+		sourceColumn: cobertura_pct
+
+	partition 'Tareas de cómputo' = m
+		mode: import
+		source =
+				let
+					Origen = PostgreSQL.Database(ServidorPG, BasePG),
+					Tabla = Origen{[Schema = "gold", Item = "v_pbi_tarea"]}[Data],
+					Columnas = Table.SelectColumns(Tabla, {"tarea_id", "fecha_key", "hora_key", "inversor_sk", "dispositivo_key", "perfil_tarea_key", "ts_inicio", "ts_fin", "duracion_min", "epocas", "batch_size", "parametros_modelo", "nucleos_cpu", "archivos", "e_carga_wh", "e_incremental_wh", "e_fv_wh", "e_red_wh", "fraccion_solar", "costo_cop", "cobertura_pct"}),
+					Tipos = Table.TransformColumnTypes(Columnas, {{"tarea_id", Int64.Type}, {"fecha_key", Int64.Type}, {"hora_key", Int64.Type}, {"inversor_sk", Int64.Type}, {"dispositivo_key", Int64.Type}, {"perfil_tarea_key", Int64.Type}, {"ts_inicio", type datetime}, {"ts_fin", type datetime}, {"duracion_min", type number}, {"epocas", Int64.Type}, {"batch_size", Int64.Type}, {"parametros_modelo", Int64.Type}, {"nucleos_cpu", Int64.Type}, {"archivos", Int64.Type}, {"e_carga_wh", type number}, {"e_incremental_wh", type number}, {"e_fv_wh", type number}, {"e_red_wh", type number}, {"fraccion_solar", type number}, {"costo_cop", type number}, {"cobertura_pct", type number}})
+				in
+					Tipos

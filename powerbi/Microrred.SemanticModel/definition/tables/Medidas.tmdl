@@ -1,0 +1,177 @@
+table Medidas
+
+	column Columna
+		dataType: int64
+		isHidden
+		summarizeBy: none
+		sourceColumn: [Value]
+		type: calculatedTableColumn
+
+	measure 'Energía solar (kWh)' = SUM('Energía diaria'[e_fv_kwh_oficial])
+		formatString: #,0.0
+		displayFolder: Energía
+
+	measure 'Consumo (kWh)' = SUM('Energía diaria'[e_carga_kwh_oficial])
+		formatString: #,0.0
+		displayFolder: Energía
+
+	measure 'Importación de red (kWh)' = SUM('Energía diaria'[e_red_kwh_oficial])
+		formatString: #,0.0
+		displayFolder: Energía
+
+	measure 'Carga de batería (kWh)' = SUM('Energía diaria'[e_bat_carga_kwh_oficial])
+		formatString: #,0.0
+		displayFolder: Energía
+
+	measure 'Descarga de batería (kWh)' = SUM('Energía diaria'[e_bat_descarga_kwh_oficial])
+		formatString: #,0.0
+		displayFolder: Energía
+
+	measure 'Autosuficiencia (%)' = DIVIDE([Consumo (kWh)] - [Importación de red (kWh)], [Consumo (kWh)])
+		formatString: 0.0%
+		displayFolder: Energía
+
+	measure 'Pérdidas del inversor (kWh)' = [Energía solar (kWh)] + [Importación de red (kWh)] + [Descarga de batería (kWh)] - [Consumo (kWh)] - [Carga de batería (kWh)]
+		formatString: #,0.0
+		displayFolder: Balance
+
+	measure 'Pérdidas del inversor (%)' = DIVIDE([Pérdidas del inversor (kWh)], [Energía solar (kWh)] + [Importación de red (kWh)] + [Descarga de batería (kWh)])
+		formatString: 0.0%
+		displayFolder: Balance
+
+	measure 'Energía del concepto (kWh)' = 
+			SWITCH(
+			    SELECTEDVALUE('Balance energético'[Concepto]),
+			    "Solar", [Energía solar (kWh)],
+			    "Red", [Importación de red (kWh)],
+			    "Descarga de batería", [Descarga de batería (kWh)],
+			    "Consumo", [Consumo (kWh)],
+			    "Carga de batería", [Carga de batería (kWh)],
+			    "Pérdidas", [Pérdidas del inversor (kWh)]
+			)
+		formatString: #,0.0
+		displayFolder: Balance
+
+	measure 'Tarifa base (COP/kWh)' = CALCULATE(MAX('Tarifa'[valor_cop_kwh]), 'Tarifa'[es_base] = TRUE())
+		formatString: #,0.00
+		displayFolder: Economía
+
+	measure 'Tarifa aplicada (COP/kWh)' = SELECTEDVALUE('Parámetro tarifa'[Tarifa (COP/kWh)], [Tarifa base (COP/kWh)])
+		formatString: #,0.00
+		displayFolder: Economía
+
+	measure 'Costo de la red (COP)' = [Importación de red (kWh)] * [Tarifa aplicada (COP/kWh)]
+		formatString: $#,0
+		displayFolder: Economía
+
+	measure 'Ahorro por autogeneración (COP)' = ([Consumo (kWh)] - [Importación de red (kWh)]) * [Tarifa aplicada (COP/kWh)]
+		formatString: $#,0
+		displayFolder: Economía
+
+	measure 'Disponibilidad (%)' = AVERAGE('Energía diaria'[disponibilidad_pct]) / 100
+		formatString: 0.0%
+		displayFolder: Calidad
+
+	measure 'Datos válidos (%)' = DIVIDE(SUM('Energía por minuto'[n_lecturas_validas]), SUM('Energía por minuto'[n_lecturas]))
+		formatString: 0.0%
+		displayFolder: Calidad
+
+	measure 'Horas en modo isla' = SUM('Energía diaria'[minutos_en_isla]) / 60
+		formatString: #,0
+		displayFolder: Calidad
+
+	measure 'Tiempo en modo isla (%)' = DIVIDE(SUM('Energía diaria'[minutos_en_isla]), SUM('Energía diaria'[minutos_con_datos]))
+		formatString: 0.0%
+		displayFolder: Calidad
+
+	measure 'Ciclos de batería por día' = DIVIDE([Descarga de batería (kWh)], MAX('Inversor'[capacidad_bateria_kwh]) * COUNTROWS('Energía diaria'))
+		formatString: 0.000
+		displayFolder: Calidad
+
+	measure 'Energía solar mes anterior (kWh)' = CALCULATE([Energía solar (kWh)], DATEADD('Fecha'[Fecha], -1, MONTH))
+		formatString: #,0.0
+		displayFolder: Tiempo
+
+	measure 'Variación solar vs mes anterior (%)' = DIVIDE([Energía solar (kWh)] - [Energía solar mes anterior (kWh)], [Energía solar mes anterior (kWh)])
+		formatString: +0.0%;-0.0%;0.0%
+		displayFolder: Tiempo
+
+	measure 'Energía solar acumulada del año (kWh)' = TOTALYTD([Energía solar (kWh)], 'Fecha'[Fecha])
+		formatString: #,0.0
+		displayFolder: Tiempo
+
+	measure 'Aumento de generación solar' = SELECTEDVALUE('Parámetro solar'[Aumento de generación solar (%)], 0) / 100
+		formatString: 0%
+		displayFolder: Escenarios
+
+	measure 'Importación de red del escenario (kWh)' = MAX(0, [Importación de red (kWh)] - [Energía solar (kWh)] * [Aumento de generación solar])
+		formatString: #,0.0
+		displayFolder: Escenarios
+
+	measure 'Costo de la red del escenario (COP)' = [Importación de red del escenario (kWh)] * [Tarifa aplicada (COP/kWh)]
+		formatString: $#,0
+		displayFolder: Escenarios
+
+	measure 'Ahorro adicional del escenario (COP)' = [Costo de la red (COP)] - [Costo de la red del escenario (COP)]
+		formatString: $#,0
+		displayFolder: Escenarios
+
+	measure 'Autosuficiencia del escenario (%)' = DIVIDE([Consumo (kWh)] - [Importación de red del escenario (kWh)], [Consumo (kWh)])
+		formatString: 0.0%
+		displayFolder: Escenarios
+
+	measure 'Tareas de cómputo' = COUNTROWS('Tareas de cómputo')
+		formatString: #,0
+		displayFolder: SolarBI
+
+	measure 'Energía incremental (kWh)' = SUM('Tareas de cómputo'[e_incremental_wh]) / 1000
+		formatString: #,0.00
+		displayFolder: SolarBI
+
+	measure 'Energía por tarea (Wh)' = DIVIDE(SUM('Tareas de cómputo'[e_incremental_wh]), COUNTROWS('Tareas de cómputo'))
+		formatString: #,0.0
+		displayFolder: SolarBI
+
+	measure 'Energía por época (Wh)' = DIVIDE(SUM('Tareas de cómputo'[e_incremental_wh]), SUM('Tareas de cómputo'[epocas]))
+		formatString: #,0.00
+		displayFolder: SolarBI
+
+	measure 'Fracción solar del cómputo (%)' = DIVIDE(SUM('Tareas de cómputo'[e_fv_wh]), SUM('Tareas de cómputo'[e_carga_wh]))
+		formatString: 0.0%
+		displayFolder: SolarBI
+
+	measure 'Costo del cómputo (COP)' = SUMX('Tareas de cómputo', MAX('Tareas de cómputo'[e_incremental_wh], 0) / 1000 * (1 - COALESCE('Tareas de cómputo'[fraccion_solar], 0)) * [Tarifa aplicada (COP/kWh)])
+		formatString: $#,0
+		displayFolder: SolarBI
+
+	measure 'Minutos de GPU' = CALCULATE(COUNTROWS('Energía por minuto'), 'Actividad de cómputo'[gpu_activa] = TRUE())
+		formatString: #,0
+		displayFolder: SolarBI
+
+	measure 'Cómputo GPU en horas de sol (%)' = DIVIDE(CALCULATE(COUNTROWS('Energía por minuto'), 'Actividad de cómputo'[gpu_activa] = TRUE(), 'Energía por minuto'[p_fv_w] > 0), [Minutos de GPU])
+		formatString: 0.0%
+		displayFolder: SolarBI
+
+	measure 'Mensaje de autosuficiencia' = "El " & FORMAT([Autosuficiencia (%)], "0%") & " del consumo no vino de la red"
+		formatString: @
+		displayFolder: Mensajes
+
+	measure 'Mensaje de ahorro' = "El sol ahorró " & FORMAT([Ahorro por autogeneración (COP)] / 1000000, "0.0") & " millones de COP"
+		formatString: @
+		displayFolder: Mensajes
+
+	measure 'Mensaje de cómputo' = "El " & FORMAT([Cómputo GPU en horas de sol (%)], "0%") & " del entrenamiento en GPU ocurre con sol"
+		formatString: @
+		displayFolder: Mensajes
+
+	measure 'Eventos operativos' = COUNTROWS('Eventos')
+		formatString: #,0
+		displayFolder: Eventos
+
+	measure 'Horas de eventos' = SUM('Eventos'[Duración (min)]) / 60
+		formatString: #,0.0
+		displayFolder: Eventos
+
+	partition Medidas = calculated
+		mode: import
+		source = {1}

@@ -1,0 +1,84 @@
+table 'Eventos'
+
+	column 'evento_id'
+		dataType: int64
+		formatString: 0
+		isHidden
+		summarizeBy: none
+		sourceColumn: evento_id
+
+	column 'inversor_id'
+		dataType: int64
+		formatString: 0
+		isHidden
+		summarizeBy: none
+		sourceColumn: inversor_id
+
+	column 'tipo_evento_key'
+		dataType: int64
+		formatString: 0
+		isHidden
+		summarizeBy: none
+		sourceColumn: tipo_evento_key
+
+	column 'Inicio'
+		dataType: dateTime
+		formatString: dd/mm/yyyy hh:nn
+		summarizeBy: none
+		sourceColumn: ts_inicio
+
+	column 'Fin'
+		dataType: dateTime
+		formatString: dd/mm/yyyy hh:nn
+		summarizeBy: none
+		sourceColumn: ts_fin
+
+	column 'Duración (min)'
+		dataType: double
+		summarizeBy: none
+		sourceColumn: duracion_min
+
+	column 'fecha_key'
+		dataType: int64
+		formatString: 0
+		isHidden
+		summarizeBy: none
+		sourceColumn: fecha_key
+
+	column 'hora_key'
+		dataType: int64
+		formatString: 0
+		isHidden
+		summarizeBy: none
+		sourceColumn: hora_key
+
+	column 'inversor_sk'
+		dataType: int64
+		formatString: 0
+		isHidden
+		summarizeBy: none
+		sourceColumn: inversor_sk
+
+	column 'dispositivo_key'
+		dataType: int64
+		formatString: 0
+		isHidden
+		summarizeBy: none
+		sourceColumn: dispositivo_key
+
+	column 'valor_referencia'
+		dataType: double
+		isHidden
+		summarizeBy: none
+		sourceColumn: valor_referencia
+
+	partition 'Eventos' = m
+		mode: import
+		source =
+				let
+					Origen = PostgreSQL.Database(ServidorPG, BasePG),
+					Tabla = Origen{[Schema = "gold", Item = "v_pbi_evento"]}[Data],
+					Columnas = Table.SelectColumns(Tabla, {"evento_id", "inversor_id", "tipo_evento_key", "ts_inicio", "ts_fin", "duracion_min", "fecha_key", "hora_key", "inversor_sk", "dispositivo_key", "valor_referencia"}),
+					Tipos = Table.TransformColumnTypes(Columnas, {{"evento_id", Int64.Type}, {"inversor_id", Int64.Type}, {"tipo_evento_key", Int64.Type}, {"ts_inicio", type datetime}, {"ts_fin", type datetime}, {"duracion_min", type number}, {"fecha_key", Int64.Type}, {"hora_key", Int64.Type}, {"inversor_sk", Int64.Type}, {"dispositivo_key", Int64.Type}, {"valor_referencia", type number}})
+				in
+					Tipos

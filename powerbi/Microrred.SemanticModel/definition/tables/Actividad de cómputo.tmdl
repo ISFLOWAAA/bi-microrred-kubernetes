@@ -1,0 +1,54 @@
+table 'Actividad de cómputo'
+
+	column 'actividad_key'
+		dataType: int64
+		formatString: 0
+		isHidden
+		summarizeBy: none
+		sourceColumn: actividad_key
+
+	column 'gpu_activa'
+		dataType: boolean
+		isHidden
+		summarizeBy: none
+		sourceColumn: gpu_activa
+
+	column 'cpu_ws1_activa'
+		dataType: boolean
+		isHidden
+		summarizeBy: none
+		sourceColumn: cpu_ws1_activa
+
+	column 'cpu_ws2_activa'
+		dataType: boolean
+		isHidden
+		summarizeBy: none
+		sourceColumn: cpu_ws2_activa
+
+	column 'n_tareas_activas'
+		dataType: int64
+		formatString: 0
+		isHidden
+		summarizeBy: none
+		sourceColumn: n_tareas_activas
+
+	column 'Actividad'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: descripcion
+
+	column 'Categoría de actividad'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: categoria
+
+	partition 'Actividad de cómputo' = m
+		mode: import
+		source =
+				let
+					Origen = PostgreSQL.Database(ServidorPG, BasePG),
+					Tabla = Origen{[Schema = "gold", Item = "dim_actividad_computo"]}[Data],
+					Columnas = Table.SelectColumns(Tabla, {"actividad_key", "gpu_activa", "cpu_ws1_activa", "cpu_ws2_activa", "n_tareas_activas", "descripcion", "categoria"}),
+					Tipos = Table.TransformColumnTypes(Columnas, {{"actividad_key", Int64.Type}, {"gpu_activa", type logical}, {"cpu_ws1_activa", type logical}, {"cpu_ws2_activa", type logical}, {"n_tareas_activas", Int64.Type}, {"descripcion", type text}, {"categoria", type text}})
+				in
+					Tipos

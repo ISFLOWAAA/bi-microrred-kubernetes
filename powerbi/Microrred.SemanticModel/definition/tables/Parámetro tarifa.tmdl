@@ -1,0 +1,17 @@
+table 'Parámetro tarifa'
+
+	column 'Tarifa (COP/kWh)'
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: [Value]
+		type: calculatedTableColumn
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 3,
+				  "kind": 2
+				}
+
+	partition 'Parámetro tarifa' = calculated
+		mode: import
+		source = GENERATESERIES(600, 1500, 10)

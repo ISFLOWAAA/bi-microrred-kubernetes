@@ -1,0 +1,48 @@
+table 'Hora'
+
+	column 'hora_key'
+		dataType: int64
+		formatString: 0
+		isHidden
+		summarizeBy: none
+		sourceColumn: hora_key
+
+	column 'Hora'
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: hora
+
+	column 'Minuto'
+		dataType: int64
+		formatString: 0
+		isHidden
+		summarizeBy: none
+		sourceColumn: minuto
+
+	column 'Hora (HH:MM)'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: hora_texto
+		sortByColumn: 'hora_key'
+
+	column 'Franja del día'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: franja_dia
+
+	column 'Franja tarifaria'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: franja_tarifaria
+
+	partition 'Hora' = m
+		mode: import
+		source =
+				let
+					Origen = PostgreSQL.Database(ServidorPG, BasePG),
+					Tabla = Origen{[Schema = "gold", Item = "dim_hora"]}[Data],
+					Columnas = Table.SelectColumns(Tabla, {"hora_key", "hora", "minuto", "hora_texto", "franja_dia", "franja_tarifaria"}),
+					Tipos = Table.TransformColumnTypes(Columnas, {{"hora_key", Int64.Type}, {"hora", Int64.Type}, {"minuto", Int64.Type}, {"hora_texto", type text}, {"franja_dia", type text}, {"franja_tarifaria", type text}})
+				in
+					Tipos

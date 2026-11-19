@@ -1,0 +1,67 @@
+relationship ebb051be-20fa-54b8-b033-00b29151d354
+	fromColumn: 'Energía diaria'.'fecha_key'
+	toColumn: 'Fecha'.'fecha_key'
+
+relationship 786eb698-9b94-5b2a-b7c6-d61060530ed3
+	fromColumn: 'Energía diaria'.'inversor_sk'
+	toColumn: 'Inversor'.'inversor_sk'
+
+relationship ea67591a-8809-5c18-8723-f2aa7ad7968b
+	fromColumn: 'Energía por minuto'.'fecha_key'
+	toColumn: 'Fecha'.'fecha_key'
+
+relationship 626cccae-5922-5d26-9407-ed1277a21af2
+	fromColumn: 'Energía por minuto'.'hora_key'
+	toColumn: 'Hora'.'hora_key'
+
+relationship c5f11f28-6f9a-517c-b885-7eca98189c23
+	fromColumn: 'Energía por minuto'.'inversor_sk'
+	toColumn: 'Inversor'.'inversor_sk'
+
+relationship b181e602-6959-584e-81ff-ae45e6662b8a
+	fromColumn: 'Energía por minuto'.'estado_key'
+	toColumn: 'Estado operativo'.'estado_key'
+
+relationship bbd06565-68fe-531a-9b71-7bc1f5f2af37
+	fromColumn: 'Energía por minuto'.'actividad_key'
+	toColumn: 'Actividad de cómputo'.'actividad_key'
+
+relationship 21597584-4738-5f10-a0d2-a9fd3bb7c895
+	fromColumn: 'Tareas de cómputo'.'fecha_key'
+	toColumn: 'Fecha'.'fecha_key'
+
+relationship fdc0e72c-349f-5dc3-a145-ec10fa9569f5
+	fromColumn: 'Tareas de cómputo'.'hora_key'
+	toColumn: 'Hora'.'hora_key'
+
+relationship 4432ccdb-8dfb-5013-8f97-099f6deab315
+	fromColumn: 'Tareas de cómputo'.'inversor_sk'
+	toColumn: 'Inversor'.'inversor_sk'
+
+relationship f8233e5c-c5f1-5660-8f5c-ba99acba171e
+	fromColumn: 'Tareas de cómputo'.'dispositivo_key'
+	toColumn: 'Dispositivo'.'dispositivo_key'
+
+relationship 18d20e01-f69b-558d-b0c4-8a156f3bf6ec
+	fromColumn: 'Tareas de cómputo'.'perfil_tarea_key'
+	toColumn: 'Perfil de tarea'.'perfil_tarea_key'
+
+relationship 4e9eed0b-22c9-538a-a66b-e2bb5af368dc
+	fromColumn: 'Eventos'.'fecha_key'
+	toColumn: 'Fecha'.'fecha_key'
+
+relationship 023a66de-51e4-5fdd-9066-0b65ee106bbc
+	fromColumn: 'Eventos'.'hora_key'
+	toColumn: 'Hora'.'hora_key'
+
+relationship 1a4f8d88-42d2-5e26-8948-d1f789adcdb2
+	fromColumn: 'Eventos'.'inversor_sk'
+	toColumn: 'Inversor'.'inversor_sk'
+
+relationship 95cab445-2df1-5bb5-a58f-914ba8c84b2a
+	fromColumn: 'Eventos'.'tipo_evento_key'
+	toColumn: 'Tipo de evento'.'tipo_evento_key'
+
+relationship 47dc8f9a-8a54-5ef4-ae41-ff707f3863b4
+	fromColumn: 'Eventos'.'dispositivo_key'
+	toColumn: 'Dispositivo'.'dispositivo_key'

@@ -1,0 +1,33 @@
+table 'Balance energético'
+
+	column 'Concepto'
+		dataType: string
+		sortByColumn: Orden
+		summarizeBy: none
+		sourceColumn: [Concepto]
+		type: calculatedTableColumn
+
+	column 'Orden'
+		dataType: int64
+		isHidden
+		summarizeBy: none
+		sourceColumn: [Orden]
+		type: calculatedTableColumn
+
+	column 'Tipo'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: [Tipo]
+		type: calculatedTableColumn
+
+
+	partition 'Balance energético' = calculated
+		mode: import
+		source =
+				DATATABLE(
+				    "Concepto", STRING, "Orden", INTEGER, "Tipo", STRING,
+				    {
+				        {"Solar", 1, "Entra"}, {"Red", 2, "Entra"}, {"Descarga de batería", 3, "Entra"},
+				        {"Consumo", 4, "Sale"}, {"Carga de batería", 5, "Sale"}, {"Pérdidas", 6, "Sale"}
+				    }
+				)

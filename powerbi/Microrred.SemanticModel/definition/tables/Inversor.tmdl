@@ -1,0 +1,112 @@
+table 'Inversor'
+
+	column 'inversor_sk'
+		dataType: int64
+		formatString: 0
+		isHidden
+		summarizeBy: none
+		sourceColumn: inversor_sk
+
+	column 'inversor_id'
+		dataType: int64
+		formatString: 0
+		isHidden
+		summarizeBy: none
+		sourceColumn: inversor_id
+
+	column 'Nombre'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: nombre
+
+	column 'Cargas que alimenta'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: cargas
+
+	column 'firmware_build'
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: firmware_build
+
+	column 'version_lib'
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: version_lib
+
+	column 'Prioridad de salida'
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: prioridad_salida
+
+	column 'Prioridad de carga'
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: prioridad_carga
+
+	column 'potencia_max_red_w'
+		dataType: int64
+		formatString: 0
+		isHidden
+		summarizeBy: none
+		sourceColumn: potencia_max_red_w
+
+	column 'capacidad_bateria_ah'
+		dataType: int64
+		formatString: 0
+		isHidden
+		summarizeBy: none
+		sourceColumn: capacidad_bateria_ah
+
+	column 'capacidad_bateria_kwh'
+		dataType: double
+		isHidden
+		summarizeBy: none
+		sourceColumn: capacidad_bateria_kwh
+
+	column 'soc_alarma_pct'
+		dataType: int64
+		formatString: 0
+		isHidden
+		summarizeBy: none
+		sourceColumn: soc_alarma_pct
+
+	column 'soc_corte_pct'
+		dataType: int64
+		formatString: 0
+		isHidden
+		summarizeBy: none
+		sourceColumn: soc_corte_pct
+
+	column 'Vigente desde'
+		dataType: dateTime
+		formatString: dd/mm/yyyy
+		summarizeBy: none
+		sourceColumn: vigente_desde
+
+	column 'Vigente hasta'
+		dataType: dateTime
+		formatString: dd/mm/yyyy
+		summarizeBy: none
+		sourceColumn: vigente_hasta
+
+	column 'Versión vigente'
+		dataType: boolean
+		summarizeBy: none
+		sourceColumn: es_vigente
+
+	partition 'Inversor' = m
+		mode: import
+		source =
+				let
+					Origen = PostgreSQL.Database(ServidorPG, BasePG),
+					Tabla = Origen{[Schema = "gold", Item = "dim_inversor"]}[Data],
+					Filtrado = Table.SelectRows(Tabla, each [inversor_sk] <> 0),
+					Columnas = Table.SelectColumns(Filtrado, {"inversor_sk", "inversor_id", "nombre", "cargas", "firmware_build", "version_lib", "prioridad_salida", "prioridad_carga", "potencia_max_red_w", "capacidad_bateria_ah", "capacidad_bateria_kwh", "soc_alarma_pct", "soc_corte_pct", "vigente_desde", "vigente_hasta", "es_vigente"}),
+					Tipos = Table.TransformColumnTypes(Columnas, {{"inversor_sk", Int64.Type}, {"inversor_id", Int64.Type}, {"nombre", type text}, {"cargas", type text}, {"firmware_build", type text}, {"version_lib", type text}, {"prioridad_salida", Int64.Type}, {"prioridad_carga", Int64.Type}, {"potencia_max_red_w", Int64.Type}, {"capacidad_bateria_ah", Int64.Type}, {"capacidad_bateria_kwh", type number}, {"soc_alarma_pct", Int64.Type}, {"soc_corte_pct", Int64.Type}, {"vigente_desde", type date}, {"vigente_hasta", type date}, {"es_vigente", type logical}})
+				in
+					Tipos

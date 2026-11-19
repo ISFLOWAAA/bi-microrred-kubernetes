@@ -1,0 +1,50 @@
+table 'Perfil de tarea'
+
+	column 'perfil_tarea_key'
+		dataType: int64
+		formatString: 0
+		isHidden
+		summarizeBy: none
+		sourceColumn: perfil_tarea_key
+
+	column 'Categoría de tarea'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: categoria
+
+	column 'Modelo'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: modelo
+
+	column 'Conjunto de datos'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: dataset
+
+	column 'Optimizador'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: optimizador
+
+	column 'Librería'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: libreria
+
+	column 'Esfuerzo estimado'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: esfuerzo_estimado
+
+	partition 'Perfil de tarea' = m
+		mode: import
+		source =
+				let
+					Origen = PostgreSQL.Database(ServidorPG, BasePG),
+					Tabla = Origen{[Schema = "gold", Item = "dim_perfil_tarea"]}[Data],
+					Filtrado = Table.SelectRows(Tabla, each [perfil_tarea_key] <> 0),
+					Columnas = Table.SelectColumns(Filtrado, {"perfil_tarea_key", "categoria", "modelo", "dataset", "optimizador", "libreria", "esfuerzo_estimado"}),
+					Tipos = Table.TransformColumnTypes(Columnas, {{"perfil_tarea_key", Int64.Type}, {"categoria", type text}, {"modelo", type text}, {"dataset", type text}, {"optimizador", type text}, {"libreria", type text}, {"esfuerzo_estimado", type text}})
+				in
+					Tipos

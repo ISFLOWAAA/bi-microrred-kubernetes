@@ -1,0 +1,155 @@
+table 'Energía diaria'
+
+	column 'fecha_key'
+		dataType: int64
+		formatString: 0
+		isHidden
+		summarizeBy: none
+		sourceColumn: fecha_key
+
+	column 'inversor_id'
+		dataType: int64
+		formatString: 0
+		isHidden
+		summarizeBy: none
+		sourceColumn: inversor_id
+
+	column 'inversor_sk'
+		dataType: int64
+		formatString: 0
+		isHidden
+		summarizeBy: none
+		sourceColumn: inversor_sk
+
+	column 'e_fv_kwh_contador'
+		dataType: double
+		isHidden
+		summarizeBy: none
+		sourceColumn: e_fv_kwh_contador
+
+	column 'e_consumo_kwh_contador'
+		dataType: double
+		isHidden
+		summarizeBy: none
+		sourceColumn: e_consumo_kwh_contador
+
+	column 'e_red_carga_kwh_contador'
+		dataType: double
+		isHidden
+		summarizeBy: none
+		sourceColumn: e_red_carga_kwh_contador
+
+	column 'e_red_bateria_kwh_contador'
+		dataType: double
+		isHidden
+		summarizeBy: none
+		sourceColumn: e_red_bateria_kwh_contador
+
+	column 'e_bat_carga_kwh_contador'
+		dataType: double
+		isHidden
+		summarizeBy: none
+		sourceColumn: e_bat_carga_kwh_contador
+
+	column 'e_bat_descarga_kwh_contador'
+		dataType: double
+		isHidden
+		summarizeBy: none
+		sourceColumn: e_bat_descarga_kwh_contador
+
+	column 'e_fv_kwh'
+		dataType: double
+		isHidden
+		summarizeBy: none
+		sourceColumn: e_fv_kwh
+
+	column 'e_carga_kwh'
+		dataType: double
+		isHidden
+		summarizeBy: none
+		sourceColumn: e_carga_kwh
+
+	column 'e_red_kwh'
+		dataType: double
+		isHidden
+		summarizeBy: none
+		sourceColumn: e_red_kwh
+
+	column 'minutos_con_datos'
+		dataType: int64
+		formatString: 0
+		isHidden
+		summarizeBy: none
+		sourceColumn: minutos_con_datos
+
+	column 'disponibilidad_pct'
+		dataType: double
+		isHidden
+		summarizeBy: none
+		sourceColumn: disponibilidad_pct
+
+	column 'datos_validos_pct'
+		dataType: double
+		isHidden
+		summarizeBy: none
+		sourceColumn: datos_validos_pct
+
+	column 'minutos_en_isla'
+		dataType: int64
+		formatString: 0
+		isHidden
+		summarizeBy: none
+		sourceColumn: minutos_en_isla
+
+	column 'dif_fv_pct'
+		dataType: double
+		isHidden
+		summarizeBy: none
+		sourceColumn: dif_fv_pct
+
+	column 'e_fv_kwh_oficial'
+		dataType: double
+		isHidden
+		summarizeBy: none
+		sourceColumn: e_fv_kwh_oficial
+
+	column 'e_carga_kwh_oficial'
+		dataType: double
+		isHidden
+		summarizeBy: none
+		sourceColumn: e_carga_kwh_oficial
+
+	column 'e_red_kwh_oficial'
+		dataType: double
+		isHidden
+		summarizeBy: none
+		sourceColumn: e_red_kwh_oficial
+
+	column 'e_bat_carga_kwh_oficial'
+		dataType: double
+		isHidden
+		summarizeBy: none
+		sourceColumn: e_bat_carga_kwh_oficial
+
+	column 'e_bat_descarga_kwh_oficial'
+		dataType: double
+		isHidden
+		summarizeBy: none
+		sourceColumn: e_bat_descarga_kwh_oficial
+
+	column 'fuente_energia'
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: fuente_energia
+
+	partition 'Energía diaria' = m
+		mode: import
+		source =
+				let
+					Origen = PostgreSQL.Database(ServidorPG, BasePG),
+					Tabla = Origen{[Schema = "gold", Item = "fact_energia_diaria"]}[Data],
+					Columnas = Table.SelectColumns(Tabla, {"fecha_key", "inversor_id", "inversor_sk", "e_fv_kwh_contador", "e_consumo_kwh_contador", "e_red_carga_kwh_contador", "e_red_bateria_kwh_contador", "e_bat_carga_kwh_contador", "e_bat_descarga_kwh_contador", "e_fv_kwh", "e_carga_kwh", "e_red_kwh", "minutos_con_datos", "disponibilidad_pct", "datos_validos_pct", "minutos_en_isla", "dif_fv_pct", "e_fv_kwh_oficial", "e_carga_kwh_oficial", "e_red_kwh_oficial", "e_bat_carga_kwh_oficial", "e_bat_descarga_kwh_oficial", "fuente_energia"}),
+					Tipos = Table.TransformColumnTypes(Columnas, {{"fecha_key", Int64.Type}, {"inversor_id", Int64.Type}, {"inversor_sk", Int64.Type}, {"e_fv_kwh_contador", type number}, {"e_consumo_kwh_contador", type number}, {"e_red_carga_kwh_contador", type number}, {"e_red_bateria_kwh_contador", type number}, {"e_bat_carga_kwh_contador", type number}, {"e_bat_descarga_kwh_contador", type number}, {"e_fv_kwh", type number}, {"e_carga_kwh", type number}, {"e_red_kwh", type number}, {"minutos_con_datos", Int64.Type}, {"disponibilidad_pct", type number}, {"datos_validos_pct", type number}, {"minutos_en_isla", Int64.Type}, {"dif_fv_pct", type number}, {"e_fv_kwh_oficial", type number}, {"e_carga_kwh_oficial", type number}, {"e_red_kwh_oficial", type number}, {"e_bat_carga_kwh_oficial", type number}, {"e_bat_descarga_kwh_oficial", type number}, {"fuente_energia", type text}})
+				in
+					Tipos

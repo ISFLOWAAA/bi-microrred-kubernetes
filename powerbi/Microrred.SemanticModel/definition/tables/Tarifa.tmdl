@@ -1,0 +1,53 @@
+table 'Tarifa'
+
+	column 'tarifa_key'
+		dataType: int64
+		formatString: 0
+		isHidden
+		summarizeBy: none
+		sourceColumn: tarifa_key
+
+	column 'Tipo de tarifa'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: tipo_tarifa
+
+	column 'Franja'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: franja
+
+	column 'valor_cop_kwh'
+		dataType: double
+		summarizeBy: none
+		sourceColumn: valor_cop_kwh
+
+	column 'vigente_desde'
+		dataType: dateTime
+		formatString: dd/mm/yyyy
+		isHidden
+		summarizeBy: none
+		sourceColumn: vigente_desde
+
+	column 'vigente_hasta'
+		dataType: dateTime
+		formatString: dd/mm/yyyy
+		isHidden
+		summarizeBy: none
+		sourceColumn: vigente_hasta
+
+	column 'es_base'
+		dataType: boolean
+		summarizeBy: none
+		sourceColumn: es_base
+
+	partition 'Tarifa' = m
+		mode: import
+		source =
+				let
+					Origen = PostgreSQL.Database(ServidorPG, BasePG),
+					Tabla = Origen{[Schema = "gold", Item = "dim_tarifa"]}[Data],
+					Columnas = Table.SelectColumns(Tabla, {"tarifa_key", "tipo_tarifa", "franja", "valor_cop_kwh", "vigente_desde", "vigente_hasta", "es_base"}),
+					Tipos = Table.TransformColumnTypes(Columnas, {{"tarifa_key", Int64.Type}, {"tipo_tarifa", type text}, {"franja", type text}, {"valor_cop_kwh", type number}, {"vigente_desde", type date}, {"vigente_hasta", type date}, {"es_base", type logical}})
+				in
+					Tipos

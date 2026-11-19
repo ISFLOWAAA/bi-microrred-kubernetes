@@ -152,3 +152,21 @@ SELECT h.hora,
  WHERE m.origen = 'historico'
    AND m.actividad_key > 0                 -- solo la ventana con bitácoras
  GROUP BY h.hora, a.categoria;
+
+-- ---------------------------------------------------------------- Para Power BI: hora local ya calculada
+-- timestamptz → hora local del sitio como timestamp sin zona: el conector de Power BI lo recibe sin ambigüedad
+-- y el modelo no necesita convertir zonas horarias. Sin las columnas JSON ni de origen.
+CREATE OR REPLACE VIEW gold.v_pbi_evento AS
+SELECT evento_id, inversor_id, tipo_evento_key,
+       ts_inicio AT TIME ZONE 'Asia/Shanghai' AS ts_inicio,
+       ts_fin    AT TIME ZONE 'Asia/Shanghai' AS ts_fin,
+       duracion_min, fecha_key, hora_key, inversor_sk, dispositivo_key, valor_referencia
+  FROM gold.fact_evento_operativo;
+
+CREATE OR REPLACE VIEW gold.v_pbi_tarea AS
+SELECT tarea_id, fecha_key, hora_key, inversor_sk, dispositivo_key, perfil_tarea_key,
+       ts_inicio AT TIME ZONE 'Asia/Shanghai' AS ts_inicio,
+       ts_fin    AT TIME ZONE 'Asia/Shanghai' AS ts_fin,
+       duracion_min, epocas, batch_size, parametros_modelo, nucleos_cpu, archivos,
+       e_carga_wh, e_incremental_wh, e_fv_wh, e_red_wh, fraccion_solar, costo_cop, cobertura_pct
+  FROM gold.fact_tarea_computo;

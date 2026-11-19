@@ -54,6 +54,8 @@ powershell -ExecutionPolicy Bypass -File k8s\borrar.ps1
 
 PostgreSQL del clúster: `localhost:5434`. Detalles en [`k8s/README.md`](k8s/README.md).
 
+Grafana: <http://localhost:3001>. Power BI: abrir [`powerbi/Microrred.pbip`](powerbi/README.md) (usuario `powerbi_lector`).
+
 **Prueba local con Docker Compose:**
 
 ```bash

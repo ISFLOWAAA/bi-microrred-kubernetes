@@ -1,0 +1,48 @@
+table 'Estado operativo'
+
+	column 'estado_key'
+		dataType: int64
+		formatString: 0
+		isHidden
+		summarizeBy: none
+		sourceColumn: estado_key
+
+	column 'modo_salida_cod'
+		dataType: int64
+		formatString: 0
+		isHidden
+		summarizeBy: none
+		sourceColumn: modo_salida_cod
+
+	column 'Modo de salida'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: modo_salida
+
+	column 'estado_carga_cod'
+		dataType: int64
+		formatString: 0
+		isHidden
+		summarizeBy: none
+		sourceColumn: estado_carga_cod
+
+	column 'Estado de carga'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: estado_carga
+
+	column 'Régimen de red'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: regimen_red
+
+	partition 'Estado operativo' = m
+		mode: import
+		source =
+				let
+					Origen = PostgreSQL.Database(ServidorPG, BasePG),
+					Tabla = Origen{[Schema = "gold", Item = "dim_estado_operativo"]}[Data],
+					Columnas = Table.SelectColumns(Tabla, {"estado_key", "modo_salida_cod", "modo_salida", "estado_carga_cod", "estado_carga", "regimen_red"}),
+					Tipos = Table.TransformColumnTypes(Columnas, {{"estado_key", Int64.Type}, {"modo_salida_cod", Int64.Type}, {"modo_salida", type text}, {"estado_carga_cod", Int64.Type}, {"estado_carga", type text}, {"regimen_red", type text}})
+				in
+					Tipos
