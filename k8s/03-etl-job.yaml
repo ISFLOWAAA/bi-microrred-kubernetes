@@ -1,0 +1,37 @@
+# Carga histórica: corre una vez, termina y deja evidencia (estado del Job + silver.etl_ejecucion).
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: etl-carga-historica
+  namespace: taller6
+spec:
+  backoffLimit: 1                 # un reintento; es idempotente, reintentar no duplica
+  activeDeadlineSeconds: 3600
+  template:
+    metadata:
+      labels: {app: etl}
+    spec:
+      restartPolicy: Never
+      initContainers:
+        - name: esperar-postgres  # no arranca hasta que la base acepte conexiones
+          image: postgres:16.15-alpine
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-c", "until pg_isready -h postgres -p 5432; do echo esperando postgres; sleep 3; done"]
+          resources:
+            requests: {cpu: 10m, memory: 16Mi}
+            limits: {cpu: 100m, memory: 64Mi}
+      containers:
+        - name: etl
+          image: taller6/etl:1.0.0
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef: {name: config-microrred}
+            - secretRef: {name: pg-credenciales}
+          volumeMounts:
+            - {name: fuente, mountPath: /datos, readOnly: true}
+          resources:
+            requests: {cpu: 500m, memory: 1Gi}
+            limits: {cpu: "2", memory: 4Gi}
+      volumes:
+        - name: fuente              # la SQLite (4,4 GB) copiada en el nodo por levantar.ps1
+          hostPath: {path: /datos-taller6, type: Directory}

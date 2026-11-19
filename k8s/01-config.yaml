@@ -1,0 +1,27 @@
+# Configuración NO sensible, separada del código y de las imágenes.
+# Las credenciales van en el Secret "pg-credenciales" (lo crea levantar.ps1 desde .env).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-microrred
+  namespace: taller6
+data:
+  # Conexión: PostgreSQL se encuentra por el nombre del Service, no por IP
+  PGHOST: postgres
+  PGPORT: "5432"
+  # ETL
+  SQLITE_PATH: /datos/opencem-v1.0.0.sqlite
+  CALCULAR_SHA256: "true"
+  DT_MAX_S: "60"
+  CARGA_ATIPICA_W: "3000"
+  SOC_BAJO_PCT: "20"
+  TEMP_ALTA_C: "45"
+  EPISODIO_MIN: "5"
+  HUECO_MIN: "10"
+  CAPACIDAD_AH_SUPUESTA: "200"
+  # Simulador
+  MODO: una_vez
+  ESCENARIO: normal
+  RUIDO_PCT: "5"
+  MAX_MINUTOS: "60"
+  RETENCION_DIAS: "7"

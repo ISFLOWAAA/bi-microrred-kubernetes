@@ -43,7 +43,7 @@ Cada fase deja algo funcionando y un commit en GitHub.
 | Datos nuevos periódicos | `CronJob` |
 | Saber si está sano | `livenessProbe` / `readinessProbe` |
 | No agotar el equipo | `resources.requests` / `limits` |
-| Acceso desde el anfitrión | `Service` tipo `NodePort` |
+| Acceso desde el anfitrión | `Service` tipo `LoadBalancer` (en kind el NodePort no llega a Windows) |
 
 ## Reparto sugerido (ambos deben entender todo)
 
@@ -62,7 +62,7 @@ Cada fase deja algo funcionando y un commit en GitHub.
 - [x] Fase 4 · Base de datos
 - [x] Fase 5 · ETL
 - [x] Fase 6 · Docker
-- [ ] Fase 7 · Kubernetes
+- [x] Fase 7 · Kubernetes
 - [ ] Fase 8 · Grafana y simulador
 - [ ] Fase 9 · Power BI
 - [ ] Fase 10 · Arquitectura, ética e informe

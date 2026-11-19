@@ -45,7 +45,16 @@ datos (.sqlite)  →  etl  →  PostgreSQL (Bronze / Silver / Gold)  →  Grafan
 
 ## Cómo levantarlo
 
-**Prueba local con Docker Compose** (la versión en Kubernetes se agrega en la Fase 7):
+**En Kubernetes (Docker Desktop)** — un comando para levantar y otro para borrar:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File k8s\levantar.ps1   # PostgreSQL → Job ETL → CronJob simulador
+powershell -ExecutionPolicy Bypass -File k8sorrar.ps1
+```
+
+PostgreSQL del clúster: `localhost:5434`. Detalles en [`k8s/README.md`](k8s/README.md).
+
+**Prueba local con Docker Compose:**
 
 ```bash
 cp .env.example .env                        # poner una contraseña real
@@ -54,7 +63,7 @@ docker build -t taller6/simulador:1.0.0 simulador
 docker compose up -d                        # PostgreSQL → ETL (una vez, ~10 min) → simulador
 ```
 
-PostgreSQL queda en `localhost:5433` (para DBeaver y Power BI). Detalles en
+Con Compose, PostgreSQL queda en `localhost:5433`. Detalles en
 [`docs/07_contenedores.md`](docs/07_contenedores.md).
 
 ## Datos y cita

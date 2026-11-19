@@ -1,0 +1,31 @@
+# Datos nuevos periódicos: cada minuto el simulador rellena los minutos que faltan.
+# Mientras el ETL no termine, falla (no hay días de referencia) y el siguiente minuto reintenta.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: simulador
+  namespace: taller6
+spec:
+  schedule: "* * * * *"
+  concurrencyPolicy: Forbid       # nunca dos simuladores a la vez
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      activeDeadlineSeconds: 55
+      template:
+        metadata:
+          labels: {app: simulador}
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: simulador
+              image: taller6/simulador:1.0.0
+              imagePullPolicy: IfNotPresent
+              envFrom:
+                - configMapRef: {name: config-microrred}
+                - secretRef: {name: pg-credenciales}
+              resources:
+                requests: {cpu: 50m, memory: 64Mi}
+                limits: {cpu: 250m, memory: 128Mi}
