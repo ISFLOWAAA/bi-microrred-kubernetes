@@ -39,9 +39,9 @@ Arriba de cada página hay un **navegador de páginas** y segmentaciones de **In
 | Relaciones correctas | `relationships.tmdl`: estrellas con las dimensiones conformadas (fecha, hora, inversor, dispositivo) |
 | Tabla de fechas propia | Tabla `Fecha`, marcada como tabla de fechas (`dataCategory: Time`, columna `Fecha` como llave) |
 | Inteligencia de tiempo | `Energía solar mes anterior (kWh)` (`DATEADD`), `Variación solar vs mes anterior (%)` y `Energía solar acumulada del año (kWh)` (`TOTALYTD`) |
-| Tres páginas con navegación, segmentaciones y drill-down | Navegador de páginas; segmentaciones; el gráfico de energía de la página 1 baja de **año → mes → día** con las flechas ⤵ |
+| Tres páginas con navegación, segmentaciones y drill-down | Navegador de páginas; segmentaciones; el gráfico de energía de la página 1 baja de **mes → día** con las flechas ⤵ |
 | Balance energético | Página 2: tabla `Balance energético` + medida `Energía del concepto (kWh)` |
-| Parámetro what-if | Tablas `Parámetro tarifa` (600–1 500 COP/kWh) y `Parámetro solar` (0–100 % más de generación): medidas de la carpeta *Escenarios*. Sin elegir valores, el escenario equivale a la situación actual |
+| Parámetro what-if | Tablas `Parámetro tarifa` (600–1 500 COP/kWh) y `Parámetro solar` (0–100 % más de generación): medidas de la carpeta *Escenarios*. Sin elegir valores, el escenario supone +20 % de generación solar y la tarifa base |
 
 ## Decisiones de diseño del modelo
 

@@ -65,5 +65,5 @@ Cada fase deja algo funcionando y un commit en GitHub.
 - [x] Fase 7 · Kubernetes
 - [x] Fase 8 · Grafana y simulador
 - [x] Fase 9 · Power BI
-- [ ] Fase 10 · Arquitectura, ética e informe
+- [x] Fase 10 · Arquitectura, ética e informe
 - [ ] Fase 11 · Sustentación

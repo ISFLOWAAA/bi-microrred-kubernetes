@@ -1,0 +1,64 @@
+# kubectl describe cronjob/simulador
+Name:                          simulador
+Namespace:                     taller6
+Labels:                        <none>
+Annotations:                   <none>
+Schedule:                      * * * * *
+Concurrency Policy:            Forbid
+Suspend:                       False
+Time Zone:                     <unset>
+Successful Job History Limit:  3
+Failed Job History Limit:      1
+Starting Deadline Seconds:     <unset>
+Selector:                      <unset>
+Parallelism:                   <unset>
+Completions:                   <unset>
+Active Deadline Seconds:       55s
+Pod Template:
+  Labels:  app=simulador
+  Containers:
+   simulador:
+    Image:      taller6/simulador:1.0.1
+    Port:       <none>
+    Host Port:  <none>
+    Limits:
+      cpu:     250m
+      memory:  128Mi
+    Requests:
+      cpu:     50m
+      memory:  64Mi
+    Environment Variables from:
+      config-microrred  ConfigMap  Optional: false
+      pg-credenciales   Secret     Optional: false
+    Environment:        <none>
+    Mounts:             <none>
+  Volumes:              <none>
+  Node-Selectors:       <none>
+  Tolerations:          <none>
+Last Schedule Time:     Thu, 19 Nov 2026 18:23:00 -0500
+Active Jobs:            <none>
+Events:
+  Type    Reason            Age                   From                Message
+  ----    ------            ----                  ----                -------
+  Normal  SuccessfulDelete  60m                   cronjob-controller  Deleted job simulador-29918782
+  Normal  SawCompletedJob   60m                   cronjob-controller  Saw completed job: simulador-29918783, condition: Failed
+  Normal  SuccessfulCreate  59m                   cronjob-controller  Created job simulador-29918784
+  Normal  SuccessfulDelete  59m                   cronjob-controller  Deleted job simulador-29918783
+  Normal  SawCompletedJob   59m                   cronjob-controller  Saw completed job: simulador-29918784, condition: Failed
+  Normal  SuccessfulCreate  58m                   cronjob-controller  Created job simulador-29918785
+  Normal  SawCompletedJob   58m                   cronjob-controller  Saw completed job: simulador-29918785, condition: Complete
+  Normal  SuccessfulCreate  57m                   cronjob-controller  Created job simulador-29918786
+  Normal  SawCompletedJob   57m                   cronjob-controller  Saw completed job: simulador-29918786, condition: Complete
+  Normal  SuccessfulCreate  56m                   cronjob-controller  Created job simulador-29918787
+  Normal  SawCompletedJob   56m                   cronjob-controller  Saw completed job: simulador-29918787, condition: Complete
+  Normal  SuccessfulCreate  55m                   cronjob-controller  Created job simulador-29918788
+  Normal  SuccessfulDelete  55m                   cronjob-controller  Deleted job simulador-29918785
+  Normal  SawCompletedJob   55m                   cronjob-controller  Saw completed job: simulador-29918788, condition: Complete
+  Normal  SuccessfulDelete  54m                   cronjob-controller  Deleted job simulador-29918786
+  Normal  SuccessfulCreate  3m52s (x52 over 54m)  cronjob-controller  (combined from similar events): Created job simulador-29918840
+
+etl-carga-historica   Complete   1/1           5m18s      64m
+simulador-29918784    Failed     0/1           59m        59m
+simulador-29918841    Complete   1/1           5s         2m52s
+simulador-29918842    Complete   1/1           6s         112s
+simulador-29918843    Complete   1/1           7s         52s

@@ -1,0 +1,54 @@
+# kubectl get: estado de la solución en el clúster (namespace taller6)
+# 2026-11-19 18:23  ·  contexto: docker-desktop
+
+NAME                    STATUS   ROLES           AGE     VERSION   INTERNAL-IP   EXTERNAL-IP   OS-IMAGE                       KERNEL-VERSION                              CONTAINER-RUNTIME
+desktop-control-plane   Ready    control-plane   4h34m   v1.36.1   172.19.0.2    <none>        Debian GNU/Linux 13 (trixie)   6.18.58.1-microsoft-standard-WSL2 (amd64)   containerd://2.3.1
+
+NAME                            READY   STATUS      RESTARTS   AGE     IP             NODE                    NOMINATED NODE   READINESS GATES
+pod/etl-carga-historica-7ts6b   0/1     Completed   0          64m     10.244.0.33    desktop-control-plane   <none>           <none>
+pod/grafana-5c7d476879-jzl5q    1/1     Running     0          58m     10.244.0.42    desktop-control-plane   <none>           <none>
+pod/postgres-0                  1/1     Running     0          64m     10.244.0.36    desktop-control-plane   <none>           <none>
+pod/simulador-29918784-xs4kx    0/1     Error       0          59m     10.244.0.41    desktop-control-plane   <none>           <none>
+pod/simulador-29918841-xrplt    0/1     Completed   0          2m35s   10.244.0.99    desktop-control-plane   <none>           <none>
+pod/simulador-29918842-7grqf    0/1     Completed   0          95s     10.244.0.100   desktop-control-plane   <none>           <none>
+pod/simulador-29918843-97sfn    0/1     Completed   0          35s     10.244.0.101   desktop-control-plane   <none>           <none>
+
+NAME                       TYPE           CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE   SELECTOR
+service/grafana            LoadBalancer   10.96.84.193   172.19.0.6    3001:32229/TCP   64m   app=grafana
+service/postgres           ClusterIP      None           <none>        5432/TCP         64m   app=postgres
+service/postgres-externo   LoadBalancer   10.96.33.90    172.19.0.5    5434:31888/TCP   64m   app=postgres
+
+NAME                      READY   UP-TO-DATE   AVAILABLE   AGE   CONTAINERS   IMAGES                   SELECTOR
+deployment.apps/grafana   1/1     1            1           64m   grafana      grafana/grafana:11.2.0   app=grafana
+
+NAME                                 DESIRED   CURRENT   READY   AGE   CONTAINERS   IMAGES                   SELECTOR
+replicaset.apps/grafana-5c7d476879   1         1         1       58m   grafana      grafana/grafana:11.2.0   app=grafana,pod-template-hash=5c7d476879
+replicaset.apps/grafana-68ff4846f    0         0         0       64m   grafana      grafana/grafana:11.2.0   app=grafana,pod-template-hash=68ff4846f
+
+NAME                        READY   AGE   CONTAINERS   IMAGES
+statefulset.apps/postgres   1/1     64m   postgres     postgres:16.15-alpine
+
+NAME                      SCHEDULE    TIMEZONE   SUSPEND   ACTIVE   LAST SCHEDULE   AGE   CONTAINERS   IMAGES                    SELECTOR
+cronjob.batch/simulador   * * * * *   <none>     False     0        35s             64m   simulador    taller6/simulador:1.0.1   <none>
+
+NAME                            STATUS     COMPLETIONS   DURATION   AGE     CONTAINERS   IMAGES                    SELECTOR
+job.batch/etl-carga-historica   Complete   1/1           5m18s      64m     etl          taller6/etl:1.0.0         batch.kubernetes.io/controller-uid=dc413581-dfad-4f0e-9a02-66f9d205126a
+job.batch/simulador-29918784    Failed     0/1           59m        59m     simulador    taller6/simulador:1.0.0   batch.kubernetes.io/controller-uid=cd56edd9-e9a7-4b06-bd53-8ce9a0ae3ebd
+job.batch/simulador-29918841    Complete   1/1           5s         2m35s   simulador    taller6/simulador:1.0.1   batch.kubernetes.io/controller-uid=3a6140da-9039-421b-8ee9-b64815d33b0a
+job.batch/simulador-29918842    Complete   1/1           6s         95s     simulador    taller6/simulador:1.0.1   batch.kubernetes.io/controller-uid=2e5ac2f1-b665-439b-bd35-93ac4fc8192f
+job.batch/simulador-29918843    Complete   1/1           7s         35s     simulador    taller6/simulador:1.0.1   batch.kubernetes.io/controller-uid=52c4fccd-f772-4bbf-93f7-1e6f84036908
+
+NAME                                        STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE   VOLUMEMODE
+persistentvolumeclaim/datos-pg-postgres-0   Bound    pvc-db23eaac-fbed-4181-aa12-b799f0473551   5Gi        RWO            standard       <unset>                 64m   Filesystem
+
+NAME                            DATA   AGE
+configmap/config-microrred      16     64m
+configmap/grafana-alertas       1      64m
+configmap/grafana-datasources   1      64m
+configmap/grafana-proveedor     1      64m
+configmap/grafana-tableros      1      64m
+configmap/kube-root-ca.crt      1      64m
+configmap/sql-init              9      64m
+
+NAME                     TYPE     DATA   AGE
+secret/pg-credenciales   Opaque   6      64m

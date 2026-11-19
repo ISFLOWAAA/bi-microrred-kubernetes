@@ -1,0 +1,80 @@
+# kubectl describe job/etl-carga-historica y su resultado
+Name:                     etl-carga-historica
+Namespace:                taller6
+Selector:                 batch.kubernetes.io/controller-uid=dc413581-dfad-4f0e-9a02-66f9d205126a
+Labels:                   app=etl
+                          batch.kubernetes.io/controller-uid=dc413581-dfad-4f0e-9a02-66f9d205126a
+                          batch.kubernetes.io/job-name=etl-carga-historica
+                          controller-uid=dc413581-dfad-4f0e-9a02-66f9d205126a
+                          job-name=etl-carga-historica
+Annotations:              <none>
+Parallelism:              1
+Completions:              1
+Completion Mode:          NonIndexed
+Suspend:                  false
+Backoff Limit:            1
+Start Time:               Thu, 19 Nov 2026 17:19:19 -0500
+Completed At:             Thu, 19 Nov 2026 17:24:37 -0500
+Duration:                 5m18s
+Active Deadline Seconds:  3600s
+Pods Statuses:            0 Active (0 Ready) / 1 Succeeded / 0 Failed
+Pod Template:
+  Labels:  app=etl
+           batch.kubernetes.io/controller-uid=dc413581-dfad-4f0e-9a02-66f9d205126a
+           batch.kubernetes.io/job-name=etl-carga-historica
+           controller-uid=dc413581-dfad-4f0e-9a02-66f9d205126a
+           job-name=etl-carga-historica
+  Init Containers:
+   esperar-postgres:
+    Image:      postgres:16.15-alpine
+    Port:       <none>
+    Host Port:  <none>
+    Command:
+      sh
+      -c
+      until pg_isready -h postgres -p 5432; do echo esperando postgres; sleep 3; done
+    Limits:
+      cpu:     100m
+      memory:  64Mi
+    Requests:
+      cpu:        10m
+      memory:     16Mi
+    Environment:  <none>
+    Mounts:       <none>
+  Containers:
+   etl:
+    Image:      taller6/etl:1.0.0
+    Port:       <none>
+    Host Port:  <none>
+    Limits:
+      cpu:     2
+      memory:  4Gi
+    Requests:
+      cpu:     500m
+      memory:  1Gi
+    Environment Variables from:
+      config-microrred  ConfigMap  Optional: false
+      pg-credenciales   Secret     Optional: false
+    Environment:        <none>
+    Mounts:
+      /datos from fuente (ro)
+  Volumes:
+   fuente:
+    Type:          HostPath (bare host directory volume)
+    Path:          /datos-taller6
+    HostPathType:  Directory
+  Node-Selectors:  <none>
+  Tolerations:     <none>
+Events:
+  Type    Reason     Age   From            Message
+  ----    ------     ----  ----            -------
+  Normal  Completed  59m   job-controller  Job completed
+
+## últimas líneas del log del ETL
+Defaulted container "etl" out of: etl, esperar-postgres (init)
+  fallas_unicas                        1      12,813.0      12,813.0    0.00%
+  fallas_unicas                        2       7,692.0       7,692.0    0.00%
+  (1.8 s)
+
+✓ ETL exitoso (ejecución #1) en 295 s
+  fact_energia_minuto=782,217 · fact_energia_diaria=642 · fact_evento_operativo=29,096 · fact_tarea_computo=14,929 · dim_inversor=6 · dim_perfil_tarea=169 · dim_tipo_evento=20

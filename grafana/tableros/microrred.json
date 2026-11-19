@@ -13,7 +13,7 @@
     "to": "now"
   },
   "schemaVersion": 39,
-  "version": 1,
+  "version": 2,
   "editable": false,
   "graphTooltip": 1,
   "liveNow": false,
@@ -199,7 +199,7 @@
           "calcs": [
             "lastNotNull"
           ],
-          "fields": "",
+          "fields": "/^regimen_red$/",
           "values": false
         },
         "colorMode": "value",

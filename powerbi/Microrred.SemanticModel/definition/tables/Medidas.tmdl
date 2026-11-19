@@ -100,7 +100,7 @@ table Medidas
 		formatString: #,0.0
 		displayFolder: Tiempo
 
-	measure 'Aumento de generación solar' = SELECTEDVALUE('Parámetro solar'[Aumento de generación solar (%)], 0) / 100
+	measure 'Aumento de generación solar' = SELECTEDVALUE('Parámetro solar'[Aumento de generación solar (%)], 20) / 100
 		formatString: 0%
 		displayFolder: Escenarios
 
@@ -136,7 +136,7 @@ table Medidas
 		formatString: #,0.00
 		displayFolder: SolarBI
 
-	measure 'Fracción solar del cómputo (%)' = DIVIDE(SUM('Tareas de cómputo'[e_fv_wh]), SUM('Tareas de cómputo'[e_carga_wh]))
+	measure 'Fracción solar del cómputo (%)' = MIN(1, DIVIDE(SUM('Tareas de cómputo'[e_fv_wh]), SUM('Tareas de cómputo'[e_carga_wh])))
 		formatString: 0.0%
 		displayFolder: SolarBI
 

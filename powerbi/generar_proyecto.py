@@ -218,7 +218,7 @@ def medidas():
          f"DIVIDE({S} - [Energía solar mes anterior (kWh)], [Energía solar mes anterior (kWh)])", "+0.0%;-0.0%;0.0%", "Tiempo"),
         ("Energía solar acumulada del año (kWh)", f"TOTALYTD({S}, {C('dim_fecha', 'fecha')})", "#,0.0", "Tiempo"),
         # escenarios (what-if)
-        ("Aumento de generación solar", "SELECTEDVALUE('Parámetro solar'[Aumento de generación solar (%)], 0) / 100", "0%", "Escenarios"),
+        ("Aumento de generación solar", "SELECTEDVALUE('Parámetro solar'[Aumento de generación solar (%)], 20) / 100", "0%", "Escenarios"),
         ("Importación de red del escenario (kWh)", f"MAX(0, {R} - {S} * [Aumento de generación solar])", "#,0.0", "Escenarios"),
         ("Costo de la red del escenario (COP)", "[Importación de red del escenario (kWh)] * [Tarifa aplicada (COP/kWh)]", "$#,0", "Escenarios"),
         ("Ahorro adicional del escenario (COP)", "[Costo de la red (COP)] - [Costo de la red del escenario (COP)]", "$#,0", "Escenarios"),
@@ -228,7 +228,7 @@ def medidas():
         ("Energía incremental (kWh)", f"SUM({t('e_incremental_wh')}) / 1000", "#,0.00", "SolarBI"),
         ("Energía por tarea (Wh)", f"DIVIDE(SUM({t('e_incremental_wh')}), COUNTROWS('Tareas de cómputo'))", "#,0.0", "SolarBI"),
         ("Energía por época (Wh)", f"DIVIDE(SUM({t('e_incremental_wh')}), SUM({t('epocas')}))", "#,0.00", "SolarBI"),
-        ("Fracción solar del cómputo (%)", f"DIVIDE(SUM({t('e_fv_wh')}), SUM({t('e_carga_wh')}))", "0.0%", "SolarBI"),
+        ("Fracción solar del cómputo (%)", f"MIN(1, DIVIDE(SUM({t('e_fv_wh')}), SUM({t('e_carga_wh')})))", "0.0%", "SolarBI"),
         ("Costo del cómputo (COP)",
          f"SUMX('Tareas de cómputo', MAX({t('e_incremental_wh')}, 0) / 1000 * (1 - COALESCE({t('fraccion_solar')}, 0)) "
          "* [Tarifa aplicada (COP/kWh)])", "$#,0", "SolarBI"),
@@ -386,15 +386,15 @@ def contenedor(nombre_v, x, y, w, h, tipo, consulta=None, titulo=None, objetos=N
 
 
 def texto(n, x, y, w, h, titulo, subtitulo):
-    parrafos = [{"textRuns": [{"value": titulo, "textStyle": {"fontWeight": "bold", "fontSize": "22pt", "color": TEXTO,
+    parrafos = [{"textRuns": [{"value": titulo, "textStyle": {"fontWeight": "bold", "fontSize": "18pt", "color": TEXTO,
                                                                "fontFamily": "Segoe UI Semibold"}}]},
-                {"textRuns": [{"value": subtitulo, "textStyle": {"fontSize": "11pt", "color": GRIS}}]}]
+                {"textRuns": [{"value": subtitulo, "textStyle": {"fontSize": "10pt", "color": GRIS}}]}]
     return contenedor(n, x, y, w, h, "textbox", None, None, {"general": [{"properties": {"paragraphs": parrafos}}]}, fondo=False)
 
 
 def tarjeta(n, x, y, w, h, medida_, titulo, color=TEXTO, tam="28D"):
     return contenedor(n, x, y, w, h, "card", {"Values": [M(medida_)]}, titulo,
-                      {"labels": [{"properties": {"fontSize": lit(tam), "color": solido(color)}}],
+                      {"labels": [{"properties": {"fontSize": lit(tam), "color": solido(color), "labelDisplayUnits": lit("1D")}}],
                        "categoryLabels": [{"properties": {"show": lit("false")}}]})
 
 
@@ -422,7 +422,8 @@ def estilo(color=None, etiquetas=False, linea=False):
          "categoryAxis": [{"properties": {"showAxisTitle": lit("false"), "fontSize": lit("10D"), "labelColor": solido(GRIS)}}],
          "valueAxis": [{"properties": {"showAxisTitle": lit("false"), "fontSize": lit("10D"), "labelColor": solido(GRIS),
                                        "gridlineColor": solido("#EEF0F3")}}],
-         "labels": [{"properties": {"show": lit("true" if etiquetas else "false"), "fontSize": lit("9D"), "color": solido(GRIS)}}]}
+         "labels": [{"properties": {"show": lit("true" if etiquetas else "false"), "fontSize": lit("9D"), "color": solido(TEXTO),
+                                "labelPosition": lit("'OutsideEnd'")}}]}
     if color:
         o["dataPoint"] = [{"properties": {"fill": solido(color)}}]
     if linea:
@@ -512,11 +513,11 @@ def reporte():
     SECCIONES.clear()
 
     INV, PER = ("Inversor", "Nombre"), ("Fecha", "Año-Mes")
-    mes = [("Fecha", "Año"), ("Fecha", "Mes"), ("Fecha", "Día")]            # drill-down: año → mes → día
+    mes = [("Fecha", "Año-Mes"), ("Fecha", "Día")]                           # drill-down: mes → día
     anio_mes = [("Fecha", "Año-Mes")]
 
     def cabecera(p, titulo, sub):
-        return [texto(f"{p}_tit", 20, 6, 590, 60, titulo, sub), navegador(f"{p}_nav"),
+        return [texto(f"{p}_tit", 20, 2, 590, 68, titulo, sub), navegador(f"{p}_nav"),
                 segmentador(f"{p}_s_inv", 20, 72, 300, 44, *INV, modo="Basic", horizontal=True),
                 segmentador(f"{p}_s_per", 332, 72, 240, 44, *PER)]
 
@@ -530,7 +531,7 @@ def reporte():
         tarjeta("r_c5", 996, 128, 264, 100, "Ahorro por autogeneración (COP)", "Ahorro por autogeneración (COP)", T_VERDE),
         grafico("r_g1", "lineClusteredColumnComboChart", 20, 240, 800, 232, mes,
                 ["Energía solar (kWh)", "Consumo (kWh)", "Importación de red (kWh)"],
-                "Energía por periodo y autosuficiencia · usa ⤵ para bajar de año a mes y a día", y2=["Autosuficiencia (%)"]),
+                "Energía por mes y autosuficiencia · usa ⤵ para ver los días de cada mes", y2=["Autosuficiencia (%)"]),
         grafico("r_g2", "columnChart", 836, 240, 424, 232, anio_mes, ["Ahorro por autogeneración (COP)"],
                 "Ahorro por mes (COP)", color=VERDE),
         grafico("r_g3", "lineChart", 20, 484, 620, 226, anio_mes, ["Energía solar (kWh)", "Energía solar mes anterior (kWh)"],
@@ -551,7 +552,7 @@ def reporte():
                 "Tiempo en modo isla por mes", color=VIOLETA)])
 
     pagina("solarbi", "SolarBI y escenarios", [
-        texto("s_tit", 20, 6, 590, 60, "SolarBI y escenarios", "¿Cuándo conviene entrenar y qué pasa si cambia la tarifa?"),
+        texto("s_tit", 20, 2, 590, 68, "SolarBI y escenarios", "¿Cuándo conviene entrenar y qué pasa si cambia la tarifa?"),
         navegador("s_nav"),
         segmentador("s_s1", 20, 72, 300, 44, "Perfil de tarea", "Categoría de tarea", modo="Basic", horizontal=True),
         segmentador("s_s2", 332, 72, 240, 44, *PER),

@@ -28,7 +28,7 @@ datos (.sqlite)  →  etl  →  PostgreSQL (Bronze / Silver / Gold)  →  Grafan
 
 | Carpeta | Contenido |
 |---|---|
-| `docs/` | Diseño, indicadores, diccionario de datos, diagramas e informe |
+| `docs/` | Diseño, indicadores, diccionario, arquitectura, ética y seguridad, hallazgos, evidencias del clúster, capturas e informe PDF |
 | `datos/` | Datos descargados de Zenodo (**no se suben a GitHub**) |
 | `sql/` | Creación de tablas y consultas de negocio |
 | `etl/` | Proceso que limpia y carga los datos + Dockerfile |
@@ -67,6 +67,11 @@ docker compose up -d                        # PostgreSQL → ETL (una vez, ~10 m
 
 Con Compose, PostgreSQL queda en `localhost:5433`. Detalles en
 [`docs/07_contenedores.md`](docs/07_contenedores.md).
+
+## Informe
+
+`docs/BI_Taller6_Asprilla_Grisales.pdf` reúne todos los componentes con capturas y evidencias del clúster.
+Se regenera con `python docs/generar_informe.py` (necesita `pip install markdown playwright` y Microsoft Edge).
 
 ## Datos y cita
 

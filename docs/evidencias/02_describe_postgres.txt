@@ -1,0 +1,48 @@
+# kubectl describe statefulset/postgres
+Name:               postgres
+Namespace:          taller6
+CreationTimestamp:  Thu, 19 Nov 2026 17:19:19 -0500
+Selector:           app=postgres
+Labels:             <none>
+Annotations:        <none>
+Replicas:           1 desired | 1 total
+Update Strategy:    RollingUpdate
+  Partition:        0
+Pods Status:        1 Running / 0 Waiting / 0 Succeeded / 0 Failed
+Pod Template:
+  Labels:  app=postgres
+  Containers:
+   postgres:
+    Image:      postgres:16.15-alpine
+    Port:       5432/TCP (pg)
+    Host Port:  0/TCP (pg)
+    Limits:
+      cpu:     2
+      memory:  2Gi
+    Requests:
+      cpu:      250m
+      memory:   512Mi
+    Liveness:   exec [sh -c pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"] delay=60s timeout=1s period=10s #success=1 #failure=6
+    Readiness:  exec [sh -c pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"] delay=5s timeout=1s period=5s #success=1 #failure=3
+    Environment Variables from:
+      pg-credenciales  Secret  Optional: false
+    Environment:
+      PGDATA:  /var/lib/postgresql/data/pgdata
+    Mounts:
+      /docker-entrypoint-initdb.d from sql-init (ro)
+      /var/lib/postgresql/data from datos-pg (rw)
+  Volumes:
+   sql-init:
+    Type:          ConfigMap (a volume populated by a ConfigMap)
+    Name:          sql-init
+    Optional:      false
+  Node-Selectors:  <none>
+  Tolerations:     <none>
+Volume Claims:
+  Name:          datos-pg
+  StorageClass:  
+  Labels:        <none>
+  Annotations:   <none>
+  Capacity:      5Gi
+  Access Modes:  [ReadWriteOnce]
+Events:          <none>

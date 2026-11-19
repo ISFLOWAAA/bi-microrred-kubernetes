@@ -1,0 +1,30 @@
+# Prueba de resiliencia (K.4): borrar pods y comprobar que todo vuelve solo
+# 2026-11-19 18:23:53
+
+## 1. PostgreSQL: se borra el pod y los datos siguen ahí
+$ kubectl -n taller6 exec postgres-0 -- psql ... (filas históricas antes): 782217
+$ kubectl -n taller6 delete pod postgres-0
+pod "postgres-0" deleted from taller6 namespace
+pod/postgres-0 condition met
+→ el pod volvió a estar Ready en 8 s
+$ (filas históricas después): 782217
+NAME         READY   STATUS    RESTARTS   AGE
+postgres-0   1/1     Running   0          8s
+
+## 2. Grafana: se borra el pod y vuelve con su tablero, sin configuración manual
+$ kubectl -n taller6 delete pod -l app=grafana
+pod "grafana-5c7d476879-jzl5q" deleted from taller6 namespace
+pod/grafana-5c7d476879-4pvgh condition met
+→ Grafana Ready en 12 s
+$ GET /api/health → {"database":"ok","version":"11.2.0","commit":"2a88694fd3ced0335bf3726cc5d0adc2d1858855"}
+$ GET /api/dashboards/uid/microrred → tablero: Microrred · Operación · 9 paneles
+$ GET /api/datasources/uid/pg-microrred/health → {"message":"Database Connection OK","status":"OK"}
+
+NAME                        READY   STATUS      RESTARTS   AGE
+etl-carga-historica-7ts6b   0/1     Completed   0          64m
+grafana-5c7d476879-4pvgh    1/1     Running     0          13s
+postgres-0                  1/1     Running     0          21s
+simulador-29918784-xs4kx    0/1     Error       0          60m
+simulador-29918842-7grqf    0/1     Completed   0          2m16s
+simulador-29918843-97sfn    0/1     Completed   0          76s
+simulador-29918844-qgjrd    0/1     Completed   0          16s
