@@ -58,7 +58,7 @@ Cada fase deja algo funcionando y un commit en GitHub.
 - [x] Fase 0 · Integrantes en el README y repo en GitHub
 - [x] Fase 1 · Datos descargados, verificados e inventariados
 - [x] Fase 2 · Negocio e indicadores
-- [ ] Fase 3 · Modelo dimensional y diccionario
+- [x] Fase 3 · Modelo dimensional y diccionario
 - [ ] Fase 4 · Base de datos
 - [ ] Fase 5 · ETL
 - [ ] Fase 6 · Docker
