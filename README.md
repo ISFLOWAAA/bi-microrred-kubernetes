@@ -49,7 +49,7 @@ datos (.sqlite)  →  etl  →  PostgreSQL (Bronze / Silver / Gold)  →  Grafan
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File k8s\levantar.ps1   # PostgreSQL → Job ETL → CronJob simulador
-powershell -ExecutionPolicy Bypass -File k8sborrar.ps1
+powershell -ExecutionPolicy Bypass -File k8s\borrar.ps1
 ```
 
 PostgreSQL del clúster: `localhost:5434`. Detalles en [`k8s/README.md`](k8s/README.md).
