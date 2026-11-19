@@ -1,0 +1,55 @@
+# Prueba local de la solución completa (Fase 6). En el clúster se usa k8s/ (Fase 7).
+#   docker compose up -d --build     levanta todo; el ETL corre una vez y termina
+#   docker compose logs -f etl       ver el avance del ETL
+#   docker compose down              apaga (los datos quedan en el volumen pgdata)
+#   docker compose down -v           apaga y borra los datos
+# Credenciales: archivo .env (copia de .env.example, no se sube a GitHub).
+name: taller6
+
+services:
+  postgres:
+    image: postgres:16.15-alpine
+    env_file: .env
+    ports:
+      - "${PG_PUERTO_HOST:-5433}:5432"     # 5432 del equipo puede estar ocupado
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./sql:/docker-entrypoint-initdb.d:ro   # DDL: se ejecuta solo con la base vacía
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  etl:
+    build: ./etl
+    image: taller6/etl:1.0.0
+    env_file: .env
+    environment:
+      PGHOST: postgres                      # por nombre del servicio, no por IP
+      PGPORT: "5432"
+    volumes:
+      - ./datos/zenodo:/datos:ro            # la fuente (4,4 GB) no va dentro de la imagen
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"                           # corre una vez y termina
+
+  simulador:
+    build: ./simulador
+    image: taller6/simulador:1.0.0
+    env_file: .env
+    environment:
+      PGHOST: postgres
+      PGPORT: "5432"
+      MODO: bucle
+      INTERVALO_S: "60"
+      ESCENARIO: ${ESCENARIO:-normal}
+    depends_on:
+      etl:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+volumes:
+  pgdata:

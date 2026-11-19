@@ -61,7 +61,7 @@ Cada fase deja algo funcionando y un commit en GitHub.
 - [x] Fase 3 · Modelo dimensional y diccionario
 - [x] Fase 4 · Base de datos
 - [x] Fase 5 · ETL
-- [ ] Fase 6 · Docker
+- [x] Fase 6 · Docker
 - [ ] Fase 7 · Kubernetes
 - [ ] Fase 8 · Grafana y simulador
 - [ ] Fase 9 · Power BI

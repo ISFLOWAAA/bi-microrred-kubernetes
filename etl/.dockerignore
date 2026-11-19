@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+README.md
+Dockerfile
+.dockerignore
+inventario_fuente.py
+diagnostico_calidad.py

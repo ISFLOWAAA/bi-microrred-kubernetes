@@ -45,7 +45,17 @@ datos (.sqlite)  →  etl  →  PostgreSQL (Bronze / Silver / Gold)  →  Grafan
 
 ## Cómo levantarlo
 
-_Pendiente: se completará cuando la solución esté construida._
+**Prueba local con Docker Compose** (la versión en Kubernetes se agrega en la Fase 7):
+
+```bash
+cp .env.example .env                        # poner una contraseña real
+docker build -t taller6/etl:1.0.0 etl
+docker build -t taller6/simulador:1.0.0 simulador
+docker compose up -d                        # PostgreSQL → ETL (una vez, ~10 min) → simulador
+```
+
+PostgreSQL queda en `localhost:5433` (para DBeaver y Power BI). Detalles en
+[`docs/07_contenedores.md`](docs/07_contenedores.md).
 
 ## Datos y cita
 
