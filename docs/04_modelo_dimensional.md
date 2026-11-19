@@ -4,7 +4,7 @@
 
 | Capa | Dónde | Qué contiene | Regla |
 |---|---|---|---|
-| **Bronze** | `datos/zenodo/opencem-v1.0.0.sqlite` + esquema `bronze` en PostgreSQL | El archivo original y su copia 1:1 de las columnas usadas (con `context.value` como `jsonb`) | Nunca se modifica; sin limpieza |
+| **Bronze** | `datos/zenodo/opencem-v1.0.0.sqlite` + `bronze.context` en PostgreSQL | El archivo original (≈ 10 millones de filas, solo lectura) y la copia 1:1 de la tabla `context` con `value` como `jsonb`, para consultarla con los operadores JSON nativos de PostgreSQL | Nunca se modifica; sin limpieza. Las tablas grandes no se duplican en PostgreSQL: el ETL las lee directamente del `.sqlite` |
 | **Silver** | Esquema `silver` | Datos limpios, en hora local, agregados a **1 minuto**, JSON ya parseado, eventos detectados | Reglas de limpieza con conteos (Fase 5) |
 | **Gold** | Esquema `gold` | Modelo en estrella: dimensiones y hechos que consumen Power BI y Grafana | Llaves sustitutas, miembros "desconocido" |
 
@@ -13,7 +13,7 @@
 Elegimos **estrella** y no copo de nieve porque:
 
 1. **Power BI** está optimizado para estrellas: relaciones 1:* directas, filtros de un solo salto y DAX más simple.
-2. **Las dimensiones son pequeñas** (la más grande, fecha, tiene unas 400 filas): normalizarlas no ahorra espacio relevante y sí agrega *joins*.
+2. **Las dimensiones son pequeñas** (la más grande, hora, tiene 1 441 filas): normalizarlas no ahorra espacio relevante y sí agrega *joins*.
 3. **Grafana** consulta con SQL escrito a mano: menos *joins* significa consultas más rápidas y legibles.
 4. Las jerarquías (año › mes › día, categoría › tipo de evento) caben como columnas de la misma dimensión.
 
@@ -68,7 +68,7 @@ erDiagram
 | `dim_perfil_tarea` | Una combinación de características de tarea | categoría (compilación CPU / entrenamiento GPU), modelo de red, conjunto de datos, optimizador, librería compilada, esfuerzo estimado | Categoría › Modelo o librería | `context.value` (JSON) |
 | `dim_dispositivo` | Un equipo que genera bitácoras | código, nombre, tipo (estación de trabajo, inversor, instalación), inversor que lo alimenta, CPU/GPU | Tipo › Dispositivo | `context.value ->> 'device'` + entradas manuales de hardware |
 
-Todas las dimensiones tienen un **miembro desconocido** (llave 0, "Sin dato"): los hechos nunca llevan
+Todas las dimensiones tienen un **miembro desconocido** (llave 0, "Sin dato"; en `dim_hora` es −1 porque 0 son las 00:00): los hechos nunca llevan
 llaves foráneas nulas, así los conteos de Power BI no pierden filas.
 
 ### 5.1 La dimensión que no existe en la fuente: `dim_actividad_computo`

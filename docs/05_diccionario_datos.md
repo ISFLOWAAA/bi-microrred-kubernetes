@@ -30,7 +30,7 @@ Fuente del diccionario de los autores: `datos/zenodo/opencem-v1.0.0/documentatio
 
 ## 2. Dimensiones (esquema `gold`)
 
-### `dim_fecha`: un día local (calendario de 2025-07-01 a 2026-07-31)
+### `dim_fecha`: un día local (calendario de 2025-07-01 a 2027-12-31: cubre el histórico y deja margen para el simulador)
 
 | Columna | Tipo | Llave | Regla de transformación | Linaje |
 |---|---|---|---|---|
